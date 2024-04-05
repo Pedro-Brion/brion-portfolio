@@ -1,0 +1,60 @@
+@import "./variables";
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  body {
+    background-color: $primaryDark;
+    color: $primaryLight;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+
+  background-color: $primaryLight;
+  color: $primaryDark;
+  
+  font-family: "Raleway", sans-serif;
+}
+
+h1 {
+  color: inherit;
+  font-family: "Courier New", Courier, monospace;
+  transition: all 400ms ease-in;
+}
+
+* {
+  overflow: hidden;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}
+.dark::view-transition-old(root) {
+  z-index: 9999;
+}
+.dark::view-transition-new(root) {
+  z-index: 1;
+}
+
+a {
+  color: inherit;
+}
