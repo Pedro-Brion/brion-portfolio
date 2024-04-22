@@ -1,11 +1,20 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import Home from "@/pages/home/Home.vue";
+import { RouteRecordRaw } from "vue-router";
 
-const routes: RouteRecordRaw[] = [{ path: "/", component: Home }];
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
-
-export default router;
+export const routes: RouteRecordRaw[] = [
+  {
+    path: "/",
+    component: () => import("@/pages/Layout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("@/pages/home/Home.vue"),
+        name:'home'
+      },
+      {
+        path: "/projects",
+        component: () => import("@/pages/projects/Projects.vue"),
+        name:'projects'
+      },
+    ],
+  },
+];

@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import router from "./router/routes";
+import router from "./router/router";
 import 'virtual:uno.css'
 import "./theme/global.scss";
 import "./theme/variables.scss";

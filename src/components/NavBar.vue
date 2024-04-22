@@ -1,16 +1,16 @@
 <script setup>
 const navLinks = [
   {
-    name: "Projects",
-    route: "home,",
+    name: "About",
+    route: "home",
   },
   {
-    name: "About",
-    route: "home,",
+    name: "Projects",
+    route: "projects",
   },
   {
     name: "Contact",
-    route: "home,",
+    route: "home",
   },
 ];
 </script>
@@ -18,8 +18,10 @@ const navLinks = [
 <template>
   <nav class="navbar">
     <div class="container">
-      <span v-for="navLink in navLinks" class="link" :key="navLink.route">
-        {{ navLink.name }}
+      <span v-for="navLink of navLinks" class="link" :key="navLink.route">
+        <RouterLink :to="{ name: navLink.route }">
+          {{ navLink.name }}
+        </RouterLink>
       </span>
     </div>
   </nav>
@@ -39,7 +41,6 @@ const navLinks = [
     justify-content: flex-end;
     padding-right: 16px;
     align-items: flex-end;
-    gap: 8px;
 
     .link {
       padding: 5px 8px;
@@ -47,6 +48,9 @@ const navLinks = [
       transition: background-color 400ms ease-in-out;
       border-top-left-radius: 5px;
       border-top-right-radius: 5px;
+      a {
+        text-decoration: none;
+      }
       &:hover {
         background-color: #00000020;
       }

@@ -1,71 +1,119 @@
 // @ts-nocheck
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Sizes } from "./sizes";
 import { Colors } from "@/theme/Colors";
 import { type Theme } from "./types";
+import Boid from "./boid";
 
-export const Experience = class {
+export class Experience {
   canvas: HTMLElement;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
   clock?: THREE.Clock;
   scene?: THREE.Scene;
-  cube?: THREE.Mesh;
+  objects: THREE.Object3D[] = [];
+  boids: Boid[] = [];
+  controls: OrbitControls;
+
+  infoPanel: HTMLElement;
 
   theme: Theme;
 
-  constructor(canvas: HTMLElement, theme: Theme) {
+  currentTime: number = 0;
+  previousTime: number = 0;
+  elapsedTime: number = 0;
+  frameCount: number = 0;
+
+  constructor(canvas: HTMLElement, theme: Theme, info: HTMLElement) {
     this.canvas = canvas;
+    this.infoPanel = info;
     this.camera = new THREE.PerspectiveCamera(75, Sizes.aspectRatio, 0.1, 100);
     this.renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       alpha: true,
+      antialias: true,
     });
     this.theme = theme;
+    // this.controls = new OrbitControls(this.camera, this.canvas);
+    // this.controls.enableDamping = true;
+    // this.controls.update();
+
     this.initialize();
   }
 
   initialize() {
     this.scene = new THREE.Scene();
 
-    this.camera.position.set(0, 2, 3);
+    this.camera.position.set(0, 0, 20);
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    const cubeColor =
+    const objectsColor =
       this.theme === "dark" ? Colors.primaryLight : Colors.primaryDark;
 
-    this.cube = new THREE.Mesh(
-      new THREE.BoxGeometry(1.01, 1.01, 1.01, 2, 2, 2),
-      new THREE.MeshBasicMaterial({
-        color: cubeColor,
-        transparent: true,
-        opacity: 0.6,
-      })
+    for (let i = 0; i < 200; i++) {
+      this.boids.push(new Boid(this, objectsColor));
+    }
+    // this.boids.push(new Boid(this, Colors.primaryLight));
+    this.objects.push(
+      new THREE.Mesh(
+        new THREE.BoxGeometry(20, 20, 20, 1, 1, 1),
+        new THREE.MeshPhysicalMaterial({
+          color: 0xffffff,
+          transmission: 1,
+          transparent: true,
+          roughness: 0,
+          thickness: 0.2,
+          opacity: 0.8,
+        })
+      )
     );
 
-    this.scene.add(this.cube);
+    this.boids.forEach((boid) => this.scene?.add(boid.mesh));
+    // this.objects.forEach((object) => this.scene?.add(object));
 
-    this.renderer.setSize(Sizes.width, Sizes.height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.setClearColor(0x000000, 0);
-
-    this.renderer.render(this.scene, this.camera);
+    this.initializeRenderer();
     window.addEventListener("resize", this.resizeRenderer);
     this.clock = new THREE.Clock();
 
     this.tick();
   }
 
+  initializeRenderer() {
+    this.renderer.setSize(Sizes.width, Sizes.height);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setClearColor(0x000000, 0);
+
+    this.renderer.render(this.scene, this.camera);
+  }
+
   tick() {
-    const elapsedTime = this.clock!.getElapsedTime();
+    this.frameCount++;
+    this.elapsedTime = this.clock!.getElapsedTime();
+    this.previousTime = this.currentTime;
+    this.currentTime = this.elapsedTime;
+    const delta = this.currentTime - this.previousTime;
 
     // Render
     this.renderer.render(this.scene!, this.camera);
+    // this.controls.update();
 
-    // this.cube!.rotation.z = elapsedTime * Math.PI;
-    this.cube!.rotation.y = (elapsedTime * Math.PI) / 20;
-    this.cube!.position.x = Math.cos((elapsedTime * Math.PI) / 10);
-    this.cube!.position.z = Math.sin((elapsedTime * Math.PI) / 10);
+    // if (this.frameCount % 4 === 0)
+    //   this.infoPanel.innerHTML = `${(1 / delta).toPrecision(2)}</br>${
+    //     this.frameCount
+    //   }`;
+
+    if (this.frameCount % 2 === 0) {
+      for (let i = 0; i < this.boids.length / 2; i++) {
+        this.boids[i].update(delta * 2, this.elapsedTime);
+      }
+    } else {
+      for (let i = Math.floor(this.boids.length / 2); i < this.boids.length; i++) {
+        this.boids[i].update(delta * 2, this.elapsedTime);
+      }
+    }
+
+    // this.boids.forEach((boid) => boid.update(delta, this.elapsedTime));
 
     // Call tick again on the next frame
     window.requestAnimationFrame(() => this.tick());
@@ -74,9 +122,13 @@ export const Experience = class {
   changeTheme(theme: Theme) {
     this.theme = theme;
     if (theme === "dark")
-      this.cube!.material.color = new THREE.Color(Colors.primaryLight);
+      this.boids.forEach((boid) =>
+        boid.changeColor(new THREE.Color(Colors.primaryLight))
+      );
     if (theme === "light")
-      this.cube!.material.color = new THREE.Color(Colors.primaryDark);
+      this.boids.forEach((boid) =>
+        boid.changeColor(new THREE.Color(Colors.primaryDark))
+      );
   }
 
   resizeRenderer = () => {
@@ -90,4 +142,4 @@ export const Experience = class {
     this.renderer.setSize(Sizes.width, Sizes.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   };
-};
+}

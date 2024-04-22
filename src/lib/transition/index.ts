@@ -30,7 +30,6 @@ export const toggleDark = (event: MouseEvent) => {
     isDark.value = !isDark.value;
     await nextTick();
   });
-  console.log("teste");
 
   // Wait for the pseudo-elements to be created:
   transition.ready.then(() => {
