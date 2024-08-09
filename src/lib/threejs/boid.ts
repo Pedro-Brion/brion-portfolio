@@ -58,12 +58,13 @@ export default class Boid {
     this.cone.material.color = color;
   }
 
-  update(delta: number, elapsedTime: number) {
+  // update(delta: number, elapsedTime: number) {
+  update(delta: number) {
     this.avoidWalls();
 
-    this.setVelocity(delta, elapsedTime);
+    this.setVelocity();
     this.setPosition(delta);
-    this.faceFront(delta);
+    this.faceFront();
   }
 
   setPosition(delta: number) {
@@ -75,7 +76,8 @@ export default class Boid {
     this.mesh.position.add(step);
   }
 
-  setVelocity(delta: number, elapsedTime: number) {
+  // setVelocity(delta: number, elapsedTime: number) {
+  setVelocity() {
     this.velocity.add(this.acceleration);
     this.acceleration.set(0, 0, 0);
   }
@@ -107,7 +109,7 @@ export default class Boid {
     }
   }
 
-  faceFront(delta?: number) {
+  faceFront() {
     const direction = this.velocity.clone();
     direction.add(this.mesh.position);
     this.mesh.lookAt(direction);

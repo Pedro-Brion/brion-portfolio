@@ -1,0 +1,12 @@
+runtime: python39
+runtime_config:
+  operating_system: "ubuntu22"
+  runtime_version: "20"
+handlers:
+  - url: /(.*\.(js|css|png|jpg))$
+    static_files: www/\1
+    upload: www/.*\.(js|css|png|jpg)$
+    # catch all handler to index.html
+  - url: /.*
+    static_files: www/index.html
+    upload: www/index.html
