@@ -35,6 +35,7 @@ export class Experience {
       antialias: true,
     });
     this.theme = theme;
+
     // this.controls = new OrbitControls(this.camera, this.canvas);
     // this.controls.enableDamping = true;
     // this.controls.update();
@@ -44,17 +45,18 @@ export class Experience {
 
   initialize() {
     this.scene = new THREE.Scene();
-
-    this.camera.position.set(0, 0, 20);
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    // this.scene.add(new THREE.AxesHelper(2));
+    this.camera.position.set(20, 10, 20);
+    // this.camera.position.set(0, 10, 40);
+    this.camera.lookAt(new THREE.Vector3(20, 0, 0));
 
     const objectsColor =
       this.theme === "dark" ? Colors.primaryLight : Colors.primaryDark;
 
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 500; i++) {
       this.boids.push(new Boid(this, objectsColor));
     }
-    // this.boids.push(new Boid(this, Colors.primaryLight));
+    // this.boids.push(new Boid(this, "#ff00ff", true));
     this.objects.push(
       new THREE.Mesh(
         new THREE.BoxGeometry(20, 20, 20, 1, 1, 1),
@@ -70,7 +72,6 @@ export class Experience {
     );
 
     this.boids.forEach((boid) => this.scene?.add(boid.mesh));
-    // this.objects.forEach((object) => this.scene?.add(object));
 
     this.initializeRenderer();
     window.addEventListener("resize", this.resizeRenderer);
@@ -99,21 +100,15 @@ export class Experience {
     // this.controls.update();
 
     // if (this.frameCount % 4 === 0)
-    //   this.infoPanel.innerHTML = `${(1 / delta).toPrecision(2)}</br>${
+    //   this.infoPanel.innerHTML = `${(1 / delta).toPrecision(3)}</br>${
     //     this.frameCount
-    //   }`;
+    //   }</br>${this.elapsedTime.toFixed(0)}`;
 
-    if (this.frameCount % 2 === 0) {
-      for (let i = 0; i < this.boids.length / 2; i++) {
-        this.boids[i].update(delta * 2, this.elapsedTime);
-      }
-    } else {
-      for (let i = Math.floor(this.boids.length / 2); i < this.boids.length; i++) {
-        this.boids[i].update(delta * 2, this.elapsedTime);
-      }
-    }
-
-    // this.boids.forEach((boid) => boid.update(delta, this.elapsedTime));
+    this.boids.forEach((boid) => {
+      if (boid.selected && this.frameCount % 4 === 0)
+        this.infoPanel.innerHTML += `</br>Vel:${boid.velocity.length()}`;
+      boid.update(delta, this.boids);
+    });
 
     // Call tick again on the next frame
     window.requestAnimationFrame(() => this.tick());

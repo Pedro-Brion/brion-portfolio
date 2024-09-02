@@ -5,10 +5,7 @@
     <div class="text">
       <h2>Oi!</h2>
       <span ref="info">
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Est odit sunt
-        dignissimos vero sed. Delectus beatae voluptas minima, velit ipsa sequi
-        tempora placeat alias, laboriosam enim nostrum, illum perferendis
-        facere?
+        I’m <strong>Pedro Brion</strong>, a frontend developer from Brazil with a passion for creating engaging web experiences. I specialize in JavaScript, TypeScript, and various frameworks, with a focus on computer graphics and optimization. I blend creativity with code to build immersive 3D websites and efficient web systems. I’m excited to collaborate on projects that challenge the norm!
       </span>
     </div>
   </div>
@@ -33,7 +30,7 @@ canvas {
   .text {
     width: 100%;
     max-width: 250px;
-    text-align: end;
+    text-align: start;
     font-size: 1.5rem;
   }
 }

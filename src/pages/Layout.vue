@@ -28,6 +28,7 @@ onMounted(() => {
 
 <template>
   <canvas ref="canvas"></canvas>
+  <div ref="info"></div>
   <div class="pages">
     <RouterView />
   </div>
