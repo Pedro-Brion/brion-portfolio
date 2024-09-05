@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { toggleDark } from "@/lib/transition";
 </script>
 

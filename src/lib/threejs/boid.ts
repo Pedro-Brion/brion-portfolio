@@ -55,14 +55,14 @@ export default class Boid {
     this.mesh.add(this.cone);
     this.cone.rotation.x = 0.5 * Math.PI;
     this.velocity.set(
-      Math.random() * 30 -15,
-      Math.random() * 30 -15,
-      Math.random() * 30 -15
+      Math.random() * 30 - 15,
+      Math.random() * 30 - 15,
+      Math.random() * 30 - 15
     );
     this.mesh.position.set(
-      Math.random() * 30 -15,
-      Math.random() * 30 -15,
-      Math.random() * 30 -15
+      Math.random() * 30 - 15,
+      Math.random() * 30 - 15,
+      Math.random() * 30 - 15
     );
 
     // this.mesh.position.x = (Math.random() - 0.5) * 5;
@@ -77,6 +77,7 @@ export default class Boid {
   update(delta: number, flock: Boid[]) {
     this.flock(flock);
     this.avoidWalls();
+    this.getBackToView();
 
     this.setVelocity(delta);
     this.setPosition(delta);
@@ -105,7 +106,7 @@ export default class Boid {
       this.acceleration.x +=
         this.wallAvoidMag * (wallsLimits[0] - this.mesh.position.x);
     }
-    if (this.mesh.position.x >= wallsLimits[1]-10) {
+    if (this.mesh.position.x >= wallsLimits[1] - 10) {
       this.acceleration.x +=
         this.wallAvoidMag * (wallsLimits[1] - this.mesh.position.x);
     }
@@ -125,6 +126,29 @@ export default class Boid {
       this.acceleration.z +=
         this.wallAvoidMag * (wallsLimits[1] - this.mesh.position.z);
     }
+  }
+
+  getBackToView() {
+    const wallsLimits = [-40, 40];
+    if (this.mesh.position.x <= wallsLimits[0]) {
+      this.mesh.position.x = wallsLimits[0]
+    }
+    if (this.mesh.position.x >= wallsLimits[1]) {
+      this.mesh.position.x = wallsLimits[1]
+    }
+    if (this.mesh.position.y <= wallsLimits[0]) {
+      this.mesh.position.y = wallsLimits[0]
+    }
+    if (this.mesh.position.y >= wallsLimits[1]) {
+      this.mesh.position.y = wallsLimits[1]
+    }
+    if (this.mesh.position.z <= wallsLimits[0]) {
+      this.mesh.position.z = wallsLimits[0]
+    }
+    if (this.mesh.position.z >= wallsLimits[1]) {
+      this.mesh.position.z = wallsLimits[1]
+    }
+   
   }
 
   flock(boids: Boid[]) {
