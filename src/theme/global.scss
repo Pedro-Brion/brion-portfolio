@@ -1,5 +1,5 @@
 @import "./variables";
-@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
 
 :root {
   font-synthesis: none;
@@ -18,12 +18,13 @@
 body {
   margin: 0;
   padding: 0;
-  height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+
+  overflow: hidden;
 
   background-color: $primaryLight;
   color: $primaryDark;
-  
+
   font-family: "Raleway", sans-serif;
 }
 
@@ -31,10 +32,6 @@ h1 {
   color: inherit;
   font-family: "Courier New", Courier, monospace;
   transition: all 400ms ease-in;
-}
-
-* {
-  overflow: hidden;
 }
 
 ::view-transition-old(root),

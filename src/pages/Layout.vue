@@ -28,10 +28,8 @@ onMounted(() => {
 
 <template>
   <canvas ref="canvas"></canvas>
-  <div ref="info"></div>
-  <div class="pages">
-    <RouterView />
-  </div>
+  <!-- <div ref="info"></div> -->
+  <RouterView />
 </template>
 
 <style lang="scss" scoped>
@@ -40,13 +38,5 @@ canvas {
   bottom: 0;
   right: 0;
   z-index: -1;
-}
-
-.pages {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 20px;
 }
 </style>

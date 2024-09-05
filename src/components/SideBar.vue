@@ -3,7 +3,7 @@ import { toggleDark } from "@/lib/transition";
 </script>
 
 <template>
-  <nav class="navbar">
+  <aside class="navbar">
     <div class="icon">
       <a href="https://github.com/Pedro-Brion" target="_blank" title="GitHub">
         <div class="i-carbon-logo-github"></div>
@@ -12,7 +12,7 @@ import { toggleDark } from "@/lib/transition";
     <div class="icon" @click="toggleDark" title="Dark Mode">
       <div class="i-carbon-sun dark:i-carbon-moon"></div>
     </div>
-  </nav>
+  </aside>
 </template>
 
 <style lang="scss" scoped>
@@ -22,7 +22,7 @@ import { toggleDark } from "@/lib/transition";
   width: 50px;
   border-right: 1px solid $primaryDark;
   display: flex;
-  height: calc(100vh - 50px);
+  height: 100%;
   align-items: center;
   justify-content: flex-end;
   flex-direction: column;
