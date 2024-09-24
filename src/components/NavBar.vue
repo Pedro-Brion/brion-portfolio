@@ -18,11 +18,11 @@ const navLinks = [
 <template>
   <nav class="navbar">
     <div class="container">
-      <span v-for="navLink of navLinks" class="link" :key="navLink.route">
+      <!-- <span v-for="navLink of navLinks" class="link" :key="navLink.route">
         <RouterLink :to="{ name: navLink.route }">
           {{ navLink.name }}
         </RouterLink>
-      </span>
+      </span> -->
     </div>
   </nav>
 </template>
