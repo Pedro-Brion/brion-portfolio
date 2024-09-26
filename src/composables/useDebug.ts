@@ -1,9 +1,10 @@
 import { useEventListener } from "@vueuse/core";
 import { ref } from "vue";
 
+const debugMode = ref<boolean>(true);
+
 export function useDebug() {
-  const debugVisibility = ref<boolean>(false);
-  const debugMode = ref<boolean>(false);
+  const debugVisibility = ref<boolean>(true);
 
   const code = [
     "ArrowUp",
@@ -35,5 +36,9 @@ export function useDebug() {
     } else codePointer = 0;
   });
 
-  return { debugVisibility, debugMode };
+  function toggleDebug() {
+    debugMode.value = !debugMode.value;
+  }
+
+  return { debugVisibility, debugMode, toggleDebug };
 }

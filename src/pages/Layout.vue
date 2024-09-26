@@ -11,11 +11,15 @@ const info = ref<HTMLElement | null>(null);
 
 const isDark = useDark();
 
-const { debugVisibility, debugMode } = useDebug();
+const { debugVisibility, debugMode, toggleDebug } = useDebug();
 
 watch(isDark, () => {
   const value = isDark.value ? "dark" : "light";
   if (experience.value) experience.value.changeTheme(value);
+});
+
+watch(debugMode, () => {
+  if (experience.value) experience.value.toggleDebug(debugMode.value);
 });
 
 onMounted(() => {
@@ -28,17 +32,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <canvas ref="canvas"></canvas>
+  <canvas ref="canvas" :class="[debugMode && 'debug']"></canvas>
   <!-- <div ref="info"></div> -->
   <button
     v-if="debugVisibility"
-    class="debug cursor-pointer"
-    @click="debugMode = !debugMode">
+    class="debug-button cursor-pointer"
+    @click="toggleDebug">
     <div class="icon">
       <div class="i-carbon-tools"></div>
     </div>
   </button>
-  <RouterView />
+  <RouterView v-if="!debugMode" />
 </template>
 
 <style lang="scss" scoped>
@@ -47,9 +51,12 @@ canvas {
   bottom: 0;
   right: 0;
   z-index: -1;
+  &.debug {
+    z-index: 1;
+  }
 }
 
-.debug {
+.debug-button {
   height: 20px;
   width: 20px;
   position: absolute;
@@ -61,6 +68,7 @@ canvas {
   border: none;
   color: tomato;
   border-radius: 7px;
+  z-index: 99;
   &:active {
     background-color: white;
   }

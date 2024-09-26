@@ -17,6 +17,7 @@ export class Experience {
   controls: OrbitControls;
 
   infoPanel: HTMLElement;
+  debug: boolean;
 
   theme: Theme;
 
@@ -25,7 +26,12 @@ export class Experience {
   elapsedTime: number = 0;
   frameCount: number = 0;
 
-  constructor(canvas: HTMLElement, theme: Theme, info: HTMLElement) {
+  constructor(
+    canvas: HTMLElement,
+    theme: Theme,
+    info: HTMLElement,
+    debug: boolean = false
+  ) {
     this.canvas = canvas;
     this.infoPanel = info;
     this.camera = new THREE.PerspectiveCamera(75, Sizes.aspectRatio, 0.1, 100);
@@ -36,19 +42,36 @@ export class Experience {
     });
     this.theme = theme;
 
-    // this.controls = new OrbitControls(this.camera, this.canvas);
-    // this.controls.enableDamping = true;
-    // this.controls.update();
+    this.debug = debug;
+
+    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.controls.enableDamping = true;
+    this.controls.update();
 
     this.initialize();
   }
 
+  toggleDebug(value: boolean) {
+    if (value) {
+      this.camera.position.set(0, 10, 40);
+      this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    } else {
+      this.camera.position.set(20, 10, 20);
+      this.camera.lookAt(new THREE.Vector3(20, 0, 0));
+    }
+    this.debug = value;
+    this.controls.enabled = value;
+  }
+
   initialize() {
     this.scene = new THREE.Scene();
-    // this.scene.add(new THREE.AxesHelper(2));
-    this.camera.position.set(20, 10, 20);
-    // this.camera.position.set(0, 10, 40);
-    this.camera.lookAt(new THREE.Vector3(20, 0, 0));
+    if (this.debug) {
+      this.camera.position.set(0, 10, 40);
+      this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    } else {
+      this.camera.position.set(20, 10, 20);
+      this.camera.lookAt(new THREE.Vector3(20, 0, 0));
+    }
 
     const objectsColor =
       this.theme === "dark" ? Colors.primaryLight : Colors.primaryDark;
@@ -97,7 +120,7 @@ export class Experience {
 
     // Render
     this.renderer.render(this.scene!, this.camera);
-    // this.controls.update();
+    if (this.debug) this.controls.update();
 
     // if (this.frameCount % 4 === 0)
     //   this.infoPanel.innerHTML = `${(1 / delta).toPrecision(3)}</br>${

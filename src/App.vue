@@ -1,9 +1,13 @@
-<script setup></script>
+<script setup>
+import { useDebug } from "./composables/useDebug";
+
+const { debugMode } = useDebug();
+</script>
 
 <template>
-  <NavBar />
+  <NavBar v-if="!debugMode" />
   <div class="content">
-    <SideBar />
+    <SideBar v-if="!debugMode" />
     <main>
       <RouterView />
     </main>
