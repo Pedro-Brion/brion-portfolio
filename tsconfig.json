@@ -21,6 +21,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
+    "strictPropertyInitialization": false,
+
     /* Aliases */
     "paths": {
       "@/*": ["./src/*"],

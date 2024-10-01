@@ -26,7 +26,8 @@ onMounted(() => {
   experience.value = new Experience(
     canvas.value!,
     isDark.value ? "dark" : "light",
-    info.value!
+    info.value!,
+    debugMode.value
   );
 });
 </script>

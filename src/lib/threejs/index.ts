@@ -1,10 +1,12 @@
-// @ts-nocheck
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Sizes } from "./sizes";
 import { Colors } from "@/theme/Colors";
 import { type Theme } from "./types";
 import Boid from "./boid";
+import { Octree } from "./octTree";
+
+const NUMBER_OF_BOIDS = 50;
 
 export class Experience {
   canvas: HTMLElement;
@@ -15,6 +17,10 @@ export class Experience {
   objects: THREE.Object3D[] = [];
   boids: Boid[] = [];
   controls: OrbitControls;
+  octree: Octree;
+
+  botBoundary = new THREE.Vector3(-40, -40, -40);
+  topBoundary = new THREE.Vector3(40, 40, 40);
 
   infoPanel: HTMLElement;
   debug: boolean;
@@ -34,7 +40,7 @@ export class Experience {
   ) {
     this.canvas = canvas;
     this.infoPanel = info;
-    this.camera = new THREE.PerspectiveCamera(75, Sizes.aspectRatio, 0.1, 100);
+    this.camera = new THREE.PerspectiveCamera(75, Sizes.aspectRatio, 0.1, 1000);
     this.renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       alpha: true,
@@ -53,7 +59,7 @@ export class Experience {
 
   toggleDebug(value: boolean) {
     if (value) {
-      this.camera.position.set(0, 10, 40);
+      this.camera.position.set(0, 20, 120);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     } else {
       this.camera.position.set(20, 10, 20);
@@ -66,7 +72,7 @@ export class Experience {
   initialize() {
     this.scene = new THREE.Scene();
     if (this.debug) {
-      this.camera.position.set(0, 10, 40);
+      this.camera.position.set(0, 20, 120);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     } else {
       this.camera.position.set(20, 10, 20);
@@ -76,13 +82,13 @@ export class Experience {
     const objectsColor =
       this.theme === "dark" ? Colors.primaryLight : Colors.primaryDark;
 
-    for (let i = 0; i < 500; i++) {
-      this.boids.push(new Boid(this, objectsColor));
+    for (let i = 0; i < NUMBER_OF_BOIDS; i++) {
+      this.boids.push(new Boid(objectsColor));
     }
     // this.boids.push(new Boid(this, "#ff00ff", true));
     this.objects.push(
       new THREE.Mesh(
-        new THREE.BoxGeometry(20, 20, 20, 1, 1, 1),
+        new THREE.BoxGeometry(30, 30, 30, 1, 1, 1),
         new THREE.MeshPhysicalMaterial({
           color: 0xffffff,
           transmission: 1,
@@ -94,7 +100,11 @@ export class Experience {
       )
     );
 
-    this.boids.forEach((boid) => this.scene?.add(boid.mesh));
+    this.boids.forEach((boid) => {
+      this.scene?.add(boid._mesh);
+    });
+    this.buildOctree();
+    this.objects.forEach((object) => this.scene?.add(object));
 
     this.initializeRenderer();
     window.addEventListener("resize", this.resizeRenderer);
@@ -103,12 +113,26 @@ export class Experience {
     this.tick();
   }
 
+  buildOctree() {
+    this.octree = new Octree(6, this.botBoundary, this.topBoundary);
+
+    this.boids.forEach((boid) => {
+      this.octree.add(boid);
+      this.scene?.add(boid._mesh);
+    });
+    this.objects.forEach((object) => this.scene?.remove(object));
+    this.objects = [];
+
+    this.objects.push(...this.octree.debugHelpers);
+    this.objects.forEach((obj)=> this.scene?.add(obj))
+  }
+
   initializeRenderer() {
     this.renderer.setSize(Sizes.width, Sizes.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearColor(0x000000, 0);
 
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene!, this.camera);
   }
 
   tick() {
@@ -128,10 +152,9 @@ export class Experience {
     //   }</br>${this.elapsedTime.toFixed(0)}`;
 
     this.boids.forEach((boid) => {
-      if (boid.selected && this.frameCount % 4 === 0)
-        this.infoPanel.innerHTML += `</br>Vel:${boid.velocity.length()}`;
       boid.update(delta, this.boids);
     });
+    this.buildOctree()
 
     // Call tick again on the next frame
     window.requestAnimationFrame(() => this.tick());
