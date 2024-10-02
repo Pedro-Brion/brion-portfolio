@@ -1,53 +1,49 @@
 import * as THREE from "three";
+import { Octree } from "./octTree";
 
 export default class Boid {
   readonly _mesh: THREE.Group;
-  _geometry: THREE.ConeGeometry;
-  color: THREE.Color | number | string;
-  cone: THREE.Mesh;
+  private _geometry: THREE.ConeGeometry;
+  private _color: THREE.Color | number | string;
+  private _cone: THREE.Mesh;
+
   selected: boolean = false;
+
+  currentNode: Octree | null;
 
   velocity: THREE.Vector3;
   acceleration: THREE.Vector3;
 
   viewRange: number = 15;
-  protectRange: number = 5;
+  viewRangeSquared: number = this.viewRange * this.viewRange;
 
-  avoidingWalls: boolean = false;
+  protectRange: number = 5;
+  protectRangeSquared: number = this.protectRange * this.protectRange;
 
   wallAvoidMag: number = 10;
-  sepMag: number = 80;
+  sepMag: number = 40;
   algMag: number = 35;
-  cohMag: number = 20;
-  freeWillMag: number = 50;
+  cohMag: number = 30;
+  freeWillMag: number = 12;
 
-  constructor(color?: Boid["color"], selected: boolean = false) {
+  constructor(color?: Boid["_color"], selected: boolean = false) {
     this.selected = selected;
-    this.color = color ?? 0xff00ff;
+    this._color = color ?? 0xff00ff;
     this._mesh = new THREE.Group();
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.acceleration = new THREE.Vector3(0, 0, 0);
 
     this._geometry = new THREE.ConeGeometry(0.3, 1, 5);
 
-    this.cone = new THREE.Mesh(
+    this._cone = new THREE.Mesh(
       this._geometry,
       new THREE.MeshBasicMaterial({
-        color: this.color,
-      })
-    );
-    const boidOut = new THREE.Line(
-      this._geometry,
-      new THREE.LineBasicMaterial({
-        color: 0x98a28e,
-        linewidth: 2,
+        color: this._color,
       })
     );
 
-    this.cone.add(boidOut);
-
-    this._mesh.add(this.cone);
-    this.cone.rotation.x = 0.5 * Math.PI;
+    this._mesh.add(this._cone);
+    this._cone.rotation.x = 0.5 * Math.PI;
     this.velocity.set(
       Math.random() * 30 - 15,
       Math.random() * 30 - 15,
@@ -68,21 +64,13 @@ export default class Boid {
 
   changeColor(color: THREE.Color) {
     //@ts-ignore
-    this.cone.material.color = color;
+    this._cone.material.color = color;
   }
 
-  // update(delta: number, elapsedTime: number) {
   update(delta: number, flock: Boid[]) {
     this.flock(flock);
     this.avoidWalls();
     this.getBackToView();
-
-    if (this.avoidingWalls) {
-      this.changeColor(new THREE.Color("red"));
-      this.avoidingWalls = false;
-    } else {
-      this.changeColor(new THREE.Color(this.color));
-    }
 
     this.setVelocity(delta);
     this.setPosition(delta);
@@ -91,7 +79,7 @@ export default class Boid {
 
   setPosition(delta: number) {
     const step = new THREE.Vector3();
-    this.velocity.clampLength(0.7, 20);
+    this.velocity.clampLength(0.7, 15);
     step.copy(this.velocity);
     step.multiplyScalar(delta);
 
@@ -106,41 +94,35 @@ export default class Boid {
   }
 
   avoidWalls() {
-    const wallsLimits = 15;
+    const wallsLimits = 25;
     if (this.position.x <= -wallsLimits) {
       this.acceleration.x +=
         this.wallAvoidMag * (-wallsLimits - this.position.x);
-      this.avoidingWalls = true;
     }
     if (this.position.x >= wallsLimits) {
       this.acceleration.x +=
         this.wallAvoidMag * (wallsLimits - this.position.x);
-      this.avoidingWalls = true;
     }
     if (this.position.y <= -wallsLimits) {
       this.acceleration.y +=
         this.wallAvoidMag * (-wallsLimits - this.position.y);
-      this.avoidingWalls = true;
     }
     if (this.position.y >= wallsLimits) {
       this.acceleration.y +=
         this.wallAvoidMag * (wallsLimits - this.position.y);
-      this.avoidingWalls = true;
     }
     if (this.position.z <= -wallsLimits) {
       this.acceleration.z +=
         this.wallAvoidMag * (-wallsLimits - this.position.z);
-      this.avoidingWalls = true;
     }
     if (this.position.z >= wallsLimits) {
       this.acceleration.z +=
         this.wallAvoidMag * (wallsLimits - this.position.z);
-      this.avoidingWalls = true;
     }
   }
 
   getBackToView() {
-    const wallsLimits = -40;
+    const wallsLimits = -80;
     if (this.position.x <= wallsLimits) {
       this.position.x = wallsLimits;
     }
@@ -172,9 +154,9 @@ export default class Boid {
     const separationVector = new THREE.Vector3(0, 0, 0);
     let neighboursCount = 0;
     boids.forEach((boid: Boid) => {
-      const d = this.position.distanceTo(boid.position);
+      const d = this.position.distanceToSquared(boid.position);
 
-      if (d < this.protectRange) {
+      if (d < this.protectRangeSquared) {
         const diff = this.position.clone().sub(boid.position);
         separationVector.add(diff);
         neighboursCount++;
@@ -194,9 +176,9 @@ export default class Boid {
     let neighboursCount = 0;
 
     boids.forEach((boid: Boid) => {
-      const d = this.position.distanceTo(boid.position);
+      const d = this.position.distanceToSquared(boid.position);
 
-      if (d < this.viewRange && d > this.protectRange) {
+      if (d < this.viewRangeSquared && d > this.protectRangeSquared) {
         neighboursCount++;
         alignmentVector.add(boid.velocity.clone());
       }
@@ -215,9 +197,9 @@ export default class Boid {
     let neighboursCount = 0;
 
     boids.forEach((boid: Boid) => {
-      const d = this.position.distanceTo(boid.position);
+      const d = this.position.distanceToSquared(boid.position);
 
-      if (d < this.viewRange && d > this.protectRange) {
+      if (d < this.viewRangeSquared && d > this.protectRangeSquared) {
         neighboursCount++;
         centerOfMass.add(boid.position.clone());
       }

@@ -2,16 +2,16 @@ import * as THREE from "three";
 import Boid from "./boid";
 
 export class Octree {
-  _boundary: Boundary;
-  _nodes: Array<Octree> = new Array<Octree>();
-  _depth: number;
+  private _boundary: CubicBoundary;
+  private _nodes: Array<Octree> = new Array<Octree>();
+  // _depth: number;
 
-  _boids: Array<Boid> = new Array<Boid>();
+  private _boids: Array<Boid> = new Array<Boid>();
 
-  minPoint: THREE.Vector3;
-  maxPoint: THREE.Vector3;
+  private _minPoint: THREE.Vector3;
+  private _maxPoint: THREE.Vector3;
 
-  subdivided: boolean;
+  private _subdivided: boolean;
 
   constructor(
     private capacity: number,
@@ -19,43 +19,44 @@ export class Octree {
     maxPoint: THREE.Vector3
   ) {
     this._boundary = new CubicBoundary(minPoint, maxPoint);
-    this.minPoint = minPoint;
-    this.maxPoint = maxPoint;
+    this._minPoint = minPoint;
+    this._maxPoint = maxPoint;
   }
 
-  subdivide() {
-    if (this.subdivided) return false;
+  private _subdivide() {
+    if (this._subdivided) return false;
     const blockSize = new THREE.Vector3(
-      (this.maxPoint.x - this.minPoint.x) / 2,
-      (this.maxPoint.y - this.minPoint.y) / 2,
-      (this.maxPoint.z - this.minPoint.z) / 2
+      (this._maxPoint.x - this._minPoint.x) / 2,
+      (this._maxPoint.y - this._minPoint.y) / 2,
+      (this._maxPoint.z - this._minPoint.z) / 2
     );
 
     for (let x = 0; x < 2; x++)
       for (let y = 0; y < 2; y++)
         for (let z = 0; z < 2; z++) {
           const minPoint = new THREE.Vector3(
-            this.minPoint.x + x * blockSize.x,
-            this.minPoint.y + y * blockSize.y,
-            this.minPoint.z + z * blockSize.z
+            this._minPoint.x + x * blockSize.x,
+            this._minPoint.y + y * blockSize.y,
+            this._minPoint.z + z * blockSize.z
           );
           const maxPoint = new THREE.Vector3(
-            this.minPoint.x + (x + 1) * blockSize.x,
-            this.minPoint.y + (y + 1) * blockSize.y,
-            this.minPoint.z + (z + 1) * blockSize.z
+            this._minPoint.x + (x + 1) * blockSize.x,
+            this._minPoint.y + (y + 1) * blockSize.y,
+            this._minPoint.z + (z + 1) * blockSize.z
           );
           this._nodes.push(new Octree(this.capacity, minPoint, maxPoint));
         }
-    this.subdivided = true;
+    this._subdivided = true;
   }
 
   add(boid: Boid): boolean {
     if (!this._boundary.contains(boid.position)) return false;
     if (this._boids.length < this.capacity) {
       this._boids.push(boid);
+      boid.currentNode = this;
       return true;
     } else {
-      this.subdivide();
+      this._subdivide();
       for (let i = 0; i < this._nodes.length; i++) {
         const node = this._nodes[i];
         if (node.add(boid)) return true;
@@ -64,28 +65,50 @@ export class Octree {
     }
   }
 
-  get debugHelpers(): THREE.Box3Helper[] {
-    if (!this.subdivided) return [this._boundary.debug];
-    const debugs = [this._boundary.debug];
+  remove(boid: Boid): boolean {
+    const index = this._boids.indexOf(boid);
+    if (index !== -1) {
+      this._boids.splice(index, 1);
+      boid.currentNode = null; // Clear the boid's reference to this node
+      return true;
+    }
+    if (this._subdivided) {
+      for (let i = 0; i < this._nodes.length; i++) {
+        const node = this._nodes[i];
+        if (node.remove(boid)) return true;
+      }
+    }
+    return false;
+  }
 
-    this._nodes.forEach((block) => {
-      debugs.push(...block.debugHelpers);
-    });
-    return debugs;
+  updateBoid(boid: Boid): boolean {
+    if (this._boundary.contains(boid.position)) return true;
+    this.remove(boid);
+    return this.add(boid);
+  }
+
+  query(sphere: THREE.Sphere): Boid[] {
+    if (!this._boids.length && !this._subdivided) return [];
+    const flock = [...this._boids];
+
+    if (!this._boundary.intersectsSphere(sphere)) {
+      return [];
+    }
+    if (this._subdivided) {
+      for (let i = 0; i < this._nodes.length; i++) {
+        const node = this._nodes[i];
+        if (node._boids.length) {
+          flock.push(...node.query(sphere));
+        }
+      }
+    }
+    return flock;
   }
 }
 
-interface Boundary {
-  _minPoint: THREE.Vector3;
-  _maxPoint: THREE.Vector3;
-  intersects: (_boundary: Boundary) => boolean;
-  contains: (_point: THREE.Vector3) => boolean;
-  debug: THREE.Box3Helper;
-}
-
-export class CubicBoundary implements Boundary {
-  _minPoint: THREE.Vector3;
-  _maxPoint: THREE.Vector3;
+export class CubicBoundary {
+  private _minPoint: THREE.Vector3;
+  private _maxPoint: THREE.Vector3;
   private _box: THREE.Box3;
 
   boxHelper: THREE.Box3Helper;
@@ -95,16 +118,10 @@ export class CubicBoundary implements Boundary {
     this._maxPoint = maxPoint;
 
     this._box = new THREE.Box3(this._minPoint, this._maxPoint);
-    this.boxHelper = new THREE.Box3Helper(this._box, "green");
   }
 
-  get debug() {
-    return this.boxHelper;
-  }
-
-  intersects(boundary: Boundary) {
-    console.log(boundary);
-    return true;
+  intersectsSphere(sphere: THREE.Sphere) {
+    return this._box.intersectsSphere(sphere);
   }
 
   contains(point: THREE.Vector3): boolean {

@@ -34,7 +34,7 @@ onMounted(() => {
 
 <template>
   <canvas ref="canvas" :class="[debugMode && 'debug']"></canvas>
-  <!-- <div ref="info"></div> -->
+  <div v-show="debugVisibility" ref="info"></div>
   <button
     v-if="debugVisibility"
     class="debug-button cursor-pointer"

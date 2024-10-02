@@ -1,21 +1,30 @@
-<script setup></script>
+<script setup>
+import ProjectComponent from "@/components/ProjectComponent.vue";
+
+const projects = [
+  {
+    title: "Boid Simulation (This Portfolio)",
+    description:
+      "As a front-end developer passionate about creating engaging web experiences, I built this Vue-powered portfolio with a real-time 3D boid simulation as its backdrop. Created using Three.js, the simulation brings together my love for computer graphics and optimization, with an octree structure managing spatial partitioning for smooth, dynamic interactions. It showcases my technical skill and creativity, blending art and code to create a visually striking, high-performance web experience. This project reflects my goal: building immersive, innovative 3D websites that leave a lasting impression.",
+    githubUrl: "https://github.com/Pedro-Brion/brion-portfolio",
+    tecs: [
+      "i-logos-unocss",
+      "i-carbon-logo-vue",
+      "i-simple-icons-typescript",
+      "i-logos-threejs",
+    ],
+  },
+];
+</script>
 
 <template>
   <div class="projects-page">
     <div class="info">
       <h2>Projetos</h2>
-      <div class="project">
-        <span class="title">Projeto 1 - </span>
-        <span class="subtitle">breve explicação</span>
-      </div>
-      <div class="project">
-        <span class="title">Projeto 2 - </span>
-        <span class="subtitle">breve explicação</span>
-      </div>
-      <div class="project">
-        <span class="title">Projeto 3 - </span>
-        <span class="subtitle">breve explicação</span>
-      </div>
+      <ProjectComponent
+        v-for="project of projects"
+        :key="project.title"
+        v-bind="project" />
     </div>
   </div>
 </template>
@@ -43,19 +52,7 @@ canvas {
     text-align: end;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-
-    .project {
-      &:hover {
-        font-size: 1.7rem;
-      }
-      .title {
-        font-weight: 500;
-      }
-      .subtitle{
-        font-weight: 300;
-      }
-    }
+    gap: 2rem;
   }
 }
 </style>

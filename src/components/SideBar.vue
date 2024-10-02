@@ -28,20 +28,7 @@ import { toggleDark } from "@/lib/transition";
   flex-direction: column;
 }
 .icon {
-  padding: 5px;
-  border-radius: 99px;
   cursor: pointer;
-  display: flex;
-  font-size: 1.5rem;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 5px;
-  transition: background-color 400ms ease-in-out;
-
-  &:hover {
-    background-color: #00000020;
-  }
-
   &:last-child {
     margin-bottom: 16px;
   }

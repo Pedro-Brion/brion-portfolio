@@ -6,24 +6,24 @@ import { type Theme } from "./types";
 import Boid from "./boid";
 import { Octree } from "./octTree";
 
-const NUMBER_OF_BOIDS = 50;
+const NUMBER_OF_BOIDS = 450;
 
 export class Experience {
-  canvas: HTMLElement;
-  camera: THREE.PerspectiveCamera;
-  renderer: THREE.WebGLRenderer;
-  clock?: THREE.Clock;
-  scene?: THREE.Scene;
-  objects: THREE.Object3D[] = [];
-  boids: Boid[] = [];
-  controls: OrbitControls;
-  octree: Octree;
+  private _canvas: HTMLElement;
+  private _camera: THREE.PerspectiveCamera;
+  private _renderer: THREE.WebGLRenderer;
+  private _clock?: THREE.Clock;
+  private _scene?: THREE.Scene;
+  private _objects: THREE.Object3D[] = [];
+  private _boids: Boid[] = [];
+  private _controls: OrbitControls;
+  private _octree: Octree;
 
-  botBoundary = new THREE.Vector3(-40, -40, -40);
-  topBoundary = new THREE.Vector3(40, 40, 40);
+  private _botBoundary = new THREE.Vector3(-40, -40, -40);
+  private _topBoundary = new THREE.Vector3(40, 40, 40);
 
-  infoPanel: HTMLElement;
-  debug: boolean;
+  private _infoPanel: HTMLElement;
+  private _debug: boolean;
 
   theme: Theme;
 
@@ -38,55 +38,60 @@ export class Experience {
     info: HTMLElement,
     debug: boolean = false
   ) {
-    this.canvas = canvas;
-    this.infoPanel = info;
-    this.camera = new THREE.PerspectiveCamera(75, Sizes.aspectRatio, 0.1, 1000);
-    this.renderer = new THREE.WebGLRenderer({
+    this._canvas = canvas;
+    this._infoPanel = info;
+    this._camera = new THREE.PerspectiveCamera(
+      75,
+      Sizes.aspectRatio,
+      0.1,
+      1000
+    );
+    this._renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       alpha: true,
       antialias: true,
     });
     this.theme = theme;
 
-    this.debug = debug;
+    this._debug = debug;
 
-    this.controls = new OrbitControls(this.camera, this.canvas);
-    this.controls.enableDamping = true;
-    this.controls.update();
+    this._controls = new OrbitControls(this._camera, this._canvas);
+    this._controls.enableDamping = true;
+    this._controls.update();
 
     this.initialize();
   }
 
   toggleDebug(value: boolean) {
     if (value) {
-      this.camera.position.set(0, 20, 120);
-      this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+      this._camera.position.set(0, 20, 120);
+      this._camera.lookAt(new THREE.Vector3(0, 0, 0));
     } else {
-      this.camera.position.set(20, 10, 20);
-      this.camera.lookAt(new THREE.Vector3(20, 0, 0));
+      this._camera.position.set(20, 10, 20);
+      this._camera.lookAt(new THREE.Vector3(20, 0, 0));
     }
-    this.debug = value;
-    this.controls.enabled = value;
+    this._debug = value;
+    this._controls.enabled = value;
   }
 
   initialize() {
-    this.scene = new THREE.Scene();
-    if (this.debug) {
-      this.camera.position.set(0, 20, 120);
-      this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    this._scene = new THREE.Scene();
+    if (this._debug) {
+      this._camera.position.set(0, 20, 120);
+      this._camera.lookAt(new THREE.Vector3(0, 0, 0));
     } else {
-      this.camera.position.set(20, 10, 20);
-      this.camera.lookAt(new THREE.Vector3(20, 0, 0));
+      this._camera.position.set(20, 10, 20);
+      this._camera.lookAt(new THREE.Vector3(20, 0, 0));
     }
 
     const objectsColor =
       this.theme === "dark" ? Colors.primaryLight : Colors.primaryDark;
 
     for (let i = 0; i < NUMBER_OF_BOIDS; i++) {
-      this.boids.push(new Boid(objectsColor));
+      this._boids.push(new Boid(objectsColor));
     }
-    // this.boids.push(new Boid(this, "#ff00ff", true));
-    this.objects.push(
+    // this.boids.push(new Boid("#ff00ff", true));
+    this._objects.push(
       new THREE.Mesh(
         new THREE.BoxGeometry(30, 30, 30, 1, 1, 1),
         new THREE.MeshPhysicalMaterial({
@@ -100,74 +105,81 @@ export class Experience {
       )
     );
 
-    this.boids.forEach((boid) => {
-      this.scene?.add(boid._mesh);
+    this._boids.forEach((boid) => {
+      this._scene?.add(boid._mesh);
     });
+
     this.buildOctree();
-    this.objects.forEach((object) => this.scene?.add(object));
 
     this.initializeRenderer();
     window.addEventListener("resize", this.resizeRenderer);
-    this.clock = new THREE.Clock();
+    this._clock = new THREE.Clock();
 
     this.tick();
   }
 
   buildOctree() {
-    this.octree = new Octree(6, this.botBoundary, this.topBoundary);
+    this._octree = new Octree(4, this._botBoundary, this._topBoundary);
 
-    this.boids.forEach((boid) => {
-      this.octree.add(boid);
-      this.scene?.add(boid._mesh);
+    this._boids.forEach((boid) => {
+      this._octree.add(boid);
     });
-    this.objects.forEach((object) => this.scene?.remove(object));
-    this.objects = [];
-
-    this.objects.push(...this.octree.debugHelpers);
-    this.objects.forEach((obj)=> this.scene?.add(obj))
   }
 
   initializeRenderer() {
-    this.renderer.setSize(Sizes.width, Sizes.height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.setClearColor(0x000000, 0);
+    this._renderer.setSize(Sizes.width, Sizes.height);
+    this._renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this._renderer.setClearColor(0x000000, 0);
 
-    this.renderer.render(this.scene!, this.camera);
+    this._renderer.render(this._scene!, this._camera);
   }
 
   tick() {
     this.frameCount++;
-    this.elapsedTime = this.clock!.getElapsedTime();
+    this.elapsedTime = this._clock!.getElapsedTime();
     this.previousTime = this.currentTime;
     this.currentTime = this.elapsedTime;
     const delta = this.currentTime - this.previousTime;
 
     // Render
-    this.renderer.render(this.scene!, this.camera);
-    if (this.debug) this.controls.update();
+    this._renderer.render(this._scene!, this._camera);
+    if (this._debug) this._controls.update();
 
-    // if (this.frameCount % 4 === 0)
-    //   this.infoPanel.innerHTML = `${(1 / delta).toPrecision(3)}</br>${
-    //     this.frameCount
-    //   }</br>${this.elapsedTime.toFixed(0)}`;
+    let size = 0;
 
-    this.boids.forEach((boid) => {
-      boid.update(delta, this.boids);
+    this._boids.forEach((boid, index) => {
+      const boidRange = new THREE.Sphere(boid.position, boid.viewRange);
+      const boids = this._octree.query(boidRange);
+      if (boid.selected) size = boids.length;
+      boid.update(delta, boids);
+
+      if (index % 5 === this.frameCount % 5) {
+        if (boid.currentNode) {
+          boid.currentNode.updateBoid(boid);
+        } else {
+          this._octree.add(boid);
+        }
+      }
     });
-    this.buildOctree()
 
-    // Call tick again on the next frame
+    if (this._debug && this._infoPanel) {
+      if (this.frameCount % 4 === 0)
+        this._infoPanel.innerHTML = `${(1 / delta).toPrecision(
+          3
+        )}</br>${this.elapsedTime.toFixed(0)}</br>${size}`;
+    }
+
     window.requestAnimationFrame(() => this.tick());
   }
 
   changeTheme(theme: Theme) {
     this.theme = theme;
     if (theme === "dark")
-      this.boids.forEach((boid) =>
+      this._boids.forEach((boid) =>
         boid.changeColor(new THREE.Color(Colors.primaryLight))
       );
     if (theme === "light")
-      this.boids.forEach((boid) =>
+      this._boids.forEach((boid) =>
         boid.changeColor(new THREE.Color(Colors.primaryDark))
       );
   }
@@ -176,11 +188,11 @@ export class Experience {
     // Update sizes
     Sizes.update();
     // Update camera
-    this.camera.aspect = Sizes.aspectRatio;
-    this.camera.updateProjectionMatrix();
+    this._camera.aspect = Sizes.aspectRatio;
+    this._camera.updateProjectionMatrix();
 
     // Update renderer
-    this.renderer.setSize(Sizes.width, Sizes.height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this._renderer.setSize(Sizes.width, Sizes.height);
+    this._renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   };
 }

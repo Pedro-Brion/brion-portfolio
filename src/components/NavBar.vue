@@ -8,21 +8,21 @@ const navLinks = [
     name: "Projects",
     route: "projects",
   },
-  {
-    name: "Contact",
-    route: "home",
-  },
+  // {
+  //   name: "Contact",
+  //   route: "home",
+  // },
 ];
 </script>
 
 <template>
   <nav class="navbar">
     <div class="container">
-      <!-- <span v-for="navLink of navLinks" class="link" :key="navLink.route">
+      <span v-for="navLink of navLinks" class="link" :key="navLink.route">
         <RouterLink :to="{ name: navLink.route }">
           {{ navLink.name }}
         </RouterLink>
-      </span> -->
+      </span>
     </div>
   </nav>
 </template>
