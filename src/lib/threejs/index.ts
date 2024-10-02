@@ -152,14 +152,6 @@ export class Experience {
       const boids = this._octree.query(boidRange);
       if (boid.selected) size = boids.length;
       boid.update(delta, boids);
-
-      if (index % 5 === this.frameCount % 5) {
-        if (boid.currentNode) {
-          boid.currentNode.updateBoid(boid);
-        } else {
-          this._octree.add(boid);
-        }
-      }
     });
 
     if (this._debug && this._infoPanel) {

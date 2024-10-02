@@ -1,6 +1,4 @@
 <script setup>
-import ProjectComponent from "@/components/ProjectComponent.vue";
-
 const projects = [
   {
     title: "Boid Simulation (This Portfolio)",
@@ -20,7 +18,7 @@ const projects = [
 <template>
   <div class="projects-page">
     <div class="info">
-      <h2>Projetos</h2>
+      <h2>Projects</h2>
       <ProjectComponent
         v-for="project of projects"
         :key="project.title"
