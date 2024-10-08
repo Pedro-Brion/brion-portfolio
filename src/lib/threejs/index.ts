@@ -147,7 +147,7 @@ export class Experience {
 
     let size = 0;
 
-    this._boids.forEach((boid, index) => {
+    this._boids.forEach((boid) => {
       const boidRange = new THREE.Sphere(boid.position, boid.viewRange);
       const boids = this._octree.query(boidRange);
       if (boid.selected) size = boids.length;
