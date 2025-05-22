@@ -1,6 +1,6 @@
 # Boid Simulation Portfolio
 
-Welcome to my Boid Simulation Portfolio, a creative and interactive web experience designed to showcase my front-end development skills. I built this project using **Vue.js** and **Three.js**, featuring a real-time boid simulation running in the background. You can see it live here:
+Welcome to my Boid Simulation Portfolio, a interactive web experience designed to showcase my front-end development skills. I built this project using **Vue.js** and **Three.js**, featuring a real-time boid simulation running in the background. You can see it live here:
 
 [BrionDev](https://briondev.com)
 
@@ -62,4 +62,4 @@ pnpm dev
 
 ## Extra
 
-For a bit of fun, input the _Konami Code_ to unlock **debug mode** and experience the boid simulation separately.
+You can input the _Konami Code_ to unlock **debug mode** and experience the boid simulation separately.
