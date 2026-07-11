@@ -1,0 +1,8 @@
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  vue-demi: true
+minimumReleaseAgeExclude:
+  - esbuild@0.24.3
+  - vue-template-compiler@3.0.0
+  - vite@6.4.2 || 6.4.3
