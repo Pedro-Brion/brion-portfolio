@@ -14,7 +14,7 @@ const { debugMode } = useDebug();
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style  scoped>
 .content {
   display: flex;
   height: calc(100dvh - 51px);

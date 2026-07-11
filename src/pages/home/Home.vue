@@ -12,8 +12,8 @@
   </div>
 </template>
 
-<style lang="scss" scoped>
-@import "../../theme/variables.scss";
+<style  scoped>
+
 
 .home-page {
   flex: 1;

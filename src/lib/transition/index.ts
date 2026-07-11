@@ -8,7 +8,6 @@ export const isDark = useDark({
   valueLight: "light",
 });
 export const toggleDark = (event: MouseEvent) => {
-  // @ts-expect-error experimental API
   // Fallback for browsers that don’t support this API:
   if (!document.startViewTransition) {
     isDark.value = !isDark.value;
@@ -21,11 +20,10 @@ export const toggleDark = (event: MouseEvent) => {
   // Get the distance to the furthest corner
   const endRadius = Math.hypot(
     Math.max(x, innerWidth - x),
-    Math.max(y, innerHeight - y)
+    Math.max(y, innerHeight - y),
   );
 
   // Create a transition:
-  // @ts-expect-error: Transition API
   const transition = document.startViewTransition(async () => {
     isDark.value = !isDark.value;
     await nextTick();
@@ -47,7 +45,7 @@ export const toggleDark = (event: MouseEvent) => {
         pseudoElement: isDark.value
           ? "::view-transition-old(root)"
           : "::view-transition-new(root)",
-      }
+      },
     );
   });
 };
