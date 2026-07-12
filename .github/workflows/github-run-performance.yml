@@ -6,7 +6,14 @@ jobs:
   Preliminar_Logs:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "INIT"
+      - run: echo "Initing job"
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.18
+      - run: npm --version
+      - name: Install Lighthouse
+        run: npm i -g lighthouse
       
 
     
