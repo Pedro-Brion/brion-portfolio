@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lighthouse": "lighthouse http://localhost:4173/ --output json --output-path ./report.json --chrome-flags='--headless --no-sandbox'"
   },
   "dependencies": {
     "@vueuse/core": "^10.11.1",

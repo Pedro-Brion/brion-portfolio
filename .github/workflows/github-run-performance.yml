@@ -1,0 +1,12 @@
+name: "[Performance]: Lighthouse run"
+run-name: Lighthouse run ${{github.run_number}}
+
+on: workflow_dispatch
+jobs:
+  Preliminar_Logs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "INIT"
+      
+
+    
