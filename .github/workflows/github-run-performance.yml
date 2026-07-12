@@ -3,7 +3,7 @@ run-name: Lighthouse run ${{github.run_number}}
 
 on: workflow_dispatch
 jobs:
-  Preliminar_Logs:
+  Run_Lighthouse:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Initing job"
@@ -11,9 +11,10 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24.18
-      - run: npm --version
       - name: Install Lighthouse
         run: npm i -g lighthouse
+      - name: Check Versions
+        run: echo "===Node Version==="; node --version ; echo "===Lighthouse Version==="; lighhouse --version
       
 
     
