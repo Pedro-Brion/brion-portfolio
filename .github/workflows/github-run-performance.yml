@@ -1,12 +1,19 @@
 name: "[Performance]: Lighthouse run"
-run-name: Lighthouse run ${{github.run_number}}
+run-name: Lighthouse Run ${{github.run_number}} on ${{github.ref_name}}
 
 on: workflow_dispatch
 jobs:
-  Preliminar_Logs:
+  Check_and_run_lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "INIT"
+      - run: echo "Initing job"
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts
+      - run: npm --version
+      - name: Install Lighthouse
+        run: npm i -g lighthouse
       
 
     
