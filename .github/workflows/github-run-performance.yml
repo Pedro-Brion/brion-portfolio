@@ -6,7 +6,7 @@ jobs:
   Run_Lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Initing job"
+      - run: echo "===Previous node==="; node --version
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
