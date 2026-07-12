@@ -14,7 +14,7 @@ jobs:
       - name: Install Lighthouse
         run: npm i -g lighthouse
       - name: Check Versions
-        run: echo "===Node Version==="; node --version ; echo "===Lighthouse Version==="; lighhouse --version
+        run: echo "===Node Version==="; node --version ; echo "===Lighthouse Version==="; lighthouse --version
       
 
     
