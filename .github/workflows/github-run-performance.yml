@@ -14,7 +14,11 @@ jobs:
       - name: Install Lighthouse
         run: npm i -g lighthouse
       - name: Check Versions
-        run: echo "===Node Version==="; node --version ; echo "===Lighthouse Version==="; lighthouse --version
-      
-
-    
+        run: >
+          echo "===Node Version==="; 
+          node --version ; 
+          echo "===Lighthouse Version==="; 
+          lighthouse --version
+      - name: Run Lighthouse on prod
+        run: |
+          lighthouse --chrome-flags="--headless --no-sandbox" https://briondev.com
