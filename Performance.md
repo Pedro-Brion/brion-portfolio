@@ -36,7 +36,7 @@ This document outlines the strategy to optimize the Brion Portfolio from its cur
 | BP-1.1 | **Lazy Load 3D Engine:** Move `Experience` instantiation to a dynamic `await import()` inside `onMounted`. | Low | High | [ ] |
 | BP-1.2 | **Tree-shake Three.js:** Replace `import * as THREE` with named imports (e.g., `{ Scene, Vector3 }`). | Medium | Med | [ ] |
 | BP-1.3 | **Manual Chunking:** Update `vite.config.ts` to separate `three` and `vue` into specific vendor chunks. | Low | Med | [ ] |
-| BP-1.4 | **Dependency Cleanup:** Remove redundant `scss` package from `devDependencies`. | Low | Low | [ ] |
+| BP-1.4 | **Dependency Cleanup:** Remove redundant `scss` package from `devDependencies`. | Low | Low | [X] |
 
 ---
 

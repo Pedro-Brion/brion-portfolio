@@ -46,7 +46,7 @@ onMounted(() => {
   <RouterView v-if="!debugMode" />
 </template>
 
-<style lang="scss" scoped>
+<style  scoped>
 canvas {
   position: absolute;
   bottom: 0;

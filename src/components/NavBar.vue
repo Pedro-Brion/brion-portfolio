@@ -27,13 +27,13 @@ const navLinks = [
   </nav>
 </template>
 
-<style lang="scss" scoped>
+<style  scoped>
 @import "../theme/variables";
 
 .navbar {
   width: 100%;
   height: 50px;
-  border-bottom: 1px solid $primaryDark;
+  border-bottom: 1px solid var(--primaryDark);
   .container {
     flex: 1;
     display: flex;
@@ -60,7 +60,7 @@ const navLinks = [
 
 .dark {
   .navbar {
-    border-color: $primaryLight;
+    border-color: var(--primaryLight);
   }
 }
 </style>

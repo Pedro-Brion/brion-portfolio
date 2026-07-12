@@ -1,4 +1,4 @@
-@import "./variables";
+@import "./variables.css";
 @import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
 
 :root {
@@ -10,8 +10,8 @@
 
 .dark {
   body {
-    background-color: $primaryDark;
-    color: $primaryLight;
+    background-color: var(--primaryDark);
+    color: var(--primaryLight);
   }
 }
 
@@ -22,8 +22,8 @@ body {
 
   overflow: hidden;
 
-  background-color: $primaryLight;
-  color: $primaryDark;
+  background-color: var(--primaryLight);
+  color: var(--primaryDark);
 
   font-family: "Raleway", sans-serif;
 }

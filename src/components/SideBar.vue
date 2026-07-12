@@ -15,12 +15,12 @@ import { toggleDark } from "@/lib/transition";
   </aside>
 </template>
 
-<style lang="scss" scoped>
+<style  scoped>
 @import "../theme/variables";
 
 .navbar {
   width: 50px;
-  border-right: 1px solid $primaryDark;
+  border-right: 1px solid var(--primaryDark);
   display: flex;
   height: 100%;
   align-items: center;
@@ -36,7 +36,7 @@ import { toggleDark } from "@/lib/transition";
 
 .dark {
   .navbar {
-    border-color: $primaryLight;
+    border-color: var(--primaryLight);
   }
 }
 </style>
