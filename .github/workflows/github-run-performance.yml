@@ -23,7 +23,7 @@ jobs:
           mkdir report
           lighthouse --chrome-flags="--headless --no-sandbox" https://briondev.com --output "json,html" --output-path ./report/index
       - name: Upload report
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ${{github.workspace}}/report
 
@@ -39,4 +39,4 @@ jobs:
       steps:
         - name: Deploy to GitHub Pages
           id: deploy
-          uses: actions/deploy-pages@4
+          uses: actions/deploy-pages@v5
