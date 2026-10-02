@@ -1,4 +1,4 @@
-name: "[Performance]: Lighthouse run"
+name: "[Performance] Lighthouse"
 run-name: Lighthouse run ${{github.run_number}}
 
 on: workflow_dispatch
@@ -20,4 +20,4 @@ jobs:
           lighthouse --version
       - name: Run Lighthouse on prod
         run: |
-          lighthouse --chrome-flags="--headless --no-sandbox" https://briondev.com
+          lighthouse --chrome-flags="--headless --no-sandbox" https://briondev.com --output "json,html" --output-path ./lh
