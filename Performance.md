@@ -22,6 +22,7 @@ This document outlines the strategy to optimize the Brion Portfolio from its cur
 | Task ID | Description | Effort | Impact | Status |
 |---|---|---|---|---|
 | DC-0.1 | **Automated Lighthouse CI:** Integrate Lighthouse CI into GitHub Actions to run on every Pull Request. | Medium | High | [ ] |
+| DC-0.1.2 | **Report History:** Keep every Lighthouse run published on GitHub Pages (e.g. `/<run_number>.html`) with an index page linking all runs. | Medium | Med | [ ] |
 | DC-0.2 | **Performance Budget:** Define a `budget.json` (e.g., max JS bundle < 200KB, max FCP < 1.2s). | Low | Med | [ ] |
 | DC-0.3 | **Web Vitals Tracking:** Implement `web-vitals` library to log real-user metrics (RUM) in production. | Low | Med | [ ] |
 | DC-0.4 | **Bundle Analysis:** Set up `rollup-plugin-visualizer` to identify "heavy hitters" in the dependency tree. | Low | High | [ ] |
@@ -85,6 +86,23 @@ onMounted(async () => {
   experience.value = new Experience(...);
 });
 ```
+
+### Report History *(Plan for DC-0.1.2)*
+Each Pages deployment **replaces the whole site**, and the runner keeps nothing between runs. Renaming the report to `${{ github.run_number }}.html` alone still leaves only the latest run online.
+
+Planned approach — store reports in a git branch:
+
+1. Create an **orphan** branch (e.g. `lighthouse-reports`) so reports don't share history with the source code.
+2. In the workflow, `actions/checkout` that branch, add the new `<run_number>.html` to it.
+3. Generate an `index.html` listing every report (a static site can't list its own files).
+4. Commit and push (job needs `contents: write`; set a git identity for the commit).
+5. Upload the branch content with `upload-pages-artifact` and deploy as today.
+
+Rejected alternatives: re-downloading old workflow artifacts (they expire with retention days) and fetching the live Pages site (no way to list which files exist).
+
+Open questions to research:
+- `${{ github.run_number }}` vs `$GITHUB_RUN_NUMBER` — who substitutes each, and when (script injection risk).
+- How `actions/checkout` behaves when the target branch doesn't exist yet.
 
 ---
 
