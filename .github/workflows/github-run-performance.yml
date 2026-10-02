@@ -20,9 +20,23 @@ jobs:
           lighthouse --version
       - name: Run Lighthouse on prod
         run: |
-          lighthouse --chrome-flags="--headless --no-sandbox" https://briondev.com --output "json,html" --output-path ./lh
+          mkdir report
+          lighthouse --chrome-flags="--headless --no-sandbox" https://briondev.com --output "json,html" --output-path ./report/index
       - name: Upload report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: report
-          path: ${{github.workspace}}/lh.report.html
+          path: ${{github.workspace}}/report
+
+  Deploy_Report:
+      needs: Run_Lighthouse
+      runs-on: ubuntu-latest
+      permissions:
+        pages: write
+        id-token: write
+      environment:
+        name: github-pages
+        url: ${{ steps.deploy.outputs.page_url }}
+      steps:
+        - name: Deploy to GitHub Pages
+          id: deploy
+          uses: actions/deploy-pages@4
