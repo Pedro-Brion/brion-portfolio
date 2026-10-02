@@ -6,7 +6,6 @@ jobs:
   Run_Lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "===Previous node==="; node --version
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
@@ -14,10 +13,10 @@ jobs:
       - name: Install Lighthouse
         run: npm i -g lighthouse
       - name: Check Versions
-        run: >
-          echo "===Node Version==="; 
-          node --version ; 
-          echo "===Lighthouse Version==="; 
+        run: |
+          echo "===Node Version===" 
+          node --version  
+          echo "===Lighthouse Version===" 
           lighthouse --version
       - name: Run Lighthouse on prod
         run: |

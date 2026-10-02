@@ -21,14 +21,14 @@
     "@iconify-json/logos": "^1.2.11",
     "@iconify-json/simple-icons": "^1.2.89",
     "@types/three": "^0.160.0",
-    "@unocss/preset-icons": "^0.58.9",
-    "@unocss/preset-mini": "^0.58.9",
-    "@vitejs/plugin-vue": "^4.6.2",
+    "@unocss/preset-icons": "^66",
+    "@unocss/preset-mini": "^66",
+    "@vitejs/plugin-vue": "^6",
     "sass": "^1.101.0",
     "typescript": "^5.9.3",
-    "unocss": "^66.0.0",
+    "unocss": "^66.7.5",
     "unplugin-vue-components": "^0.25.2",
-    "vite": "^5.4.21",
+    "vite": "^7",
     "vue-tsc": "^2.2.12"
   }
 }
