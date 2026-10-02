@@ -23,7 +23,6 @@ jobs:
           lighthouse --chrome-flags="--headless --no-sandbox" https://briondev.com --output "json,html" --output-path ./lh
       - name: Upload report
         uses: actions/upload-artifact@v7
-        id: artifact-upload-step
         with:
           name: report
-          path: /home/runner/work/brion-portfolio/brion-portfolio/lh.report.html
+          path: ${{github.workspace}}/lh.report.html
