@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
-import { Experience } from "@/lib/threejs";
+import { type Experience } from "@/lib/threejs";
 import { useDark } from "@vueuse/core";
 import { useDebug } from "@/composables/useDebug";
 
@@ -22,7 +22,10 @@ watch(debugMode, () => {
   if (experience.value) experience.value.toggleDebug(debugMode.value);
 });
 
-onMounted(() => {
+onMounted(async () => {
+  // Wait for the first content paint before loading 3d experience
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const { Experience } = await import("@/lib/threejs")
   experience.value = new Experience(
     canvas.value!,
     isDark.value ? "dark" : "light",
@@ -35,10 +38,7 @@ onMounted(() => {
 <template>
   <canvas ref="canvas" :class="[debugMode && 'debug']"></canvas>
   <div v-show="debugVisibility" ref="info"></div>
-  <button
-    v-if="debugVisibility"
-    class="debug-button cursor-pointer"
-    @click="toggleDebug">
+  <button v-if="debugVisibility" class="debug-button cursor-pointer" @click="toggleDebug">
     <div class="icon">
       <div class="i-carbon-tools"></div>
     </div>
@@ -46,12 +46,13 @@ onMounted(() => {
   <RouterView v-if="!debugMode" />
 </template>
 
-<style  scoped>
+<style scoped>
 canvas {
   position: absolute;
   bottom: 0;
   right: 0;
   z-index: -1;
+
   &.debug {
     z-index: 1;
   }
@@ -70,6 +71,7 @@ canvas {
   color: tomato;
   border-radius: 7px;
   z-index: 99;
+
   &:active {
     background-color: white;
   }
