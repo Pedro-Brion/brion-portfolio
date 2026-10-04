@@ -7,28 +7,33 @@
     "dev": "vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
-    "lighthouse": "lighthouse http://localhost:4173/ --output json --output-path ./report.json --chrome-flags='--headless --no-sandbox'"
+    "lighthouse": "lighthouse http://localhost:4173/ --output \"json,html\" --chrome-flags=\"--headless --no-sandbox\" --output-path=./reports/",
+    "lh": "node ./scripts/lighthouse.mjs"
   },
   "dependencies": {
     "@vueuse/core": "^10.11.1",
     "three": "^0.159.0",
     "url": "^0.11.4",
-    "vue": "^3.5.39",
+    "vue": "^3.5.43",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@iconify-json/carbon": "^1.2.24",
-    "@iconify-json/logos": "^1.2.11",
-    "@iconify-json/simple-icons": "^1.2.89",
+    "@iconify-json/carbon": "^1.2.28",
+    "@iconify-json/logos": "^1.2.15",
+    "@iconify-json/simple-icons": "^1.2.98",
+    "@types/node": "^26.6.4",
     "@types/three": "^0.160.0",
-    "@unocss/preset-icons": "^0.58.9",
-    "@unocss/preset-mini": "^0.58.9",
-    "@vitejs/plugin-vue": "^4.6.2",
-    "sass": "^1.101.0",
+    "@unocss/preset-icons": "^66.10.5",
+    "@unocss/preset-mini": "^66.10.5",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "chrome-launcher": "^1.2.2",
+    "lighthouse": "^13.5.0",
+    "sass": "^1.105.1",
     "typescript": "^5.9.3",
-    "unocss": "^66.0.0",
+    "unocss": "^66.10.5",
     "unplugin-vue-components": "^0.25.2",
-    "vite": "^5.4.21",
+    "vite": "^8.3.2",
     "vue-tsc": "^2.2.12"
-  }
+  },
+  "packageManager": "pnpm@12.9.0"
 }

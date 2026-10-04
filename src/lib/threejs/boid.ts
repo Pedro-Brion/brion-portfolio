@@ -54,8 +54,6 @@ export default class Boid {
       Math.random() * 30 - 15,
       Math.random() * 30 - 15
     );
-
-    // this.mesh.position.x = (Math.random() - 0.5) * 5;
   }
 
   get position() {
