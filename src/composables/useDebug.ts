@@ -1,7 +1,7 @@
 import { useEventListener } from "@vueuse/core";
 import { ref } from "vue";
 
-const debugMode = ref<boolean>(true);
+const debugMode = ref<boolean>(false);
 
 export function useDebug() {
   const debugVisibility = ref<boolean>(false);
