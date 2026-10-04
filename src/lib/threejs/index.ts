@@ -90,7 +90,7 @@ export class Experience {
     for (let i = 0; i < NUMBER_OF_BOIDS; i++) {
       this._boids.push(new Boid(objectsColor));
     }
-    // this.boids.push(new Boid("#ff00ff", true));
+    // this._boids.push(new Boid("#ff00ff", true));
     this._objects.push(
       new THREE.Mesh(
         new THREE.BoxGeometry(30, 30, 30, 1, 1, 1),
