@@ -1,31 +1,20 @@
-name: "[Performance] Lighthouse"
-run-name: Lighthouse run ${{github.run_number}}
+name: "[Performance]: Lighthouse run"
+run-name: Lighthouse Run ${{github.run_number}} on ${{github.ref_name}}
 
 on: workflow_dispatch
 jobs:
-  Run_Lighthouse:
+  Check_and_run_lighthouse:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "Initing job"
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: 24.18
+          node-version: lts
+      - run: npm --version
       - name: Install Lighthouse
         run: npm i -g lighthouse
-      - name: Check Versions
-        run: |
-          echo "===Node Version===" 
-          node --version  
-          echo "===Lighthouse Version===" 
-          lighthouse --version
-      - name: Run Lighthouse on prod
-        run: |
-          mkdir report
-          lighthouse --chrome-flags="--headless --no-sandbox" https://briondev.com --output "json,html" --output-path ./report/index
-      - name: Upload report
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: ${{github.workspace}}/report
+      
 
   Deploy_Report:
       needs: Run_Lighthouse
