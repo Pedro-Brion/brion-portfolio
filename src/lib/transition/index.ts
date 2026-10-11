@@ -45,6 +45,7 @@ export const toggleDark = (event: MouseEvent) => {
         pseudoElement: isDark.value
           ? "::view-transition-old(root)"
           : "::view-transition-new(root)",
+        fill: "forwards",
       },
     );
   });
