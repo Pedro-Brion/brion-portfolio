@@ -1,10 +1,6 @@
 import {
-  BoxGeometry,
   Clock,
-  Color,
-  Mesh,
-  MeshPhysicalMaterial,
-  Object3D,
+  MeshBasicMaterial,
   PerspectiveCamera,
   Scene,
   Sphere,
@@ -26,7 +22,6 @@ export class Experience {
   private _renderer: WebGLRenderer;
   private _clock?: Clock;
   private _scene?: Scene;
-  private _objects: Object3D[] = [];
   private _boids: Boid[] = [];
   private _controls: OrbitControls;
   private _octree: Octree;
@@ -36,6 +31,13 @@ export class Experience {
 
   private _infoPanel: HTMLElement;
   private _debug: boolean;
+
+  private static _boidRangeSphere: Sphere = new Sphere(
+    new Vector3(0, 0, 0),
+    Boid.viewRange,
+  );
+  private static _boidsQueried: Boid[] = [];
+  private _boidsMaterial: MeshBasicMaterial;
 
   theme: Theme;
 
@@ -91,26 +93,13 @@ export class Experience {
       this._camera.lookAt(new Vector3(20, 0, 0));
     }
 
-    const objectsColor =
-      this.theme === "dark" ? Colors.primaryLight : Colors.primaryDark;
+    this._boidsMaterial = new MeshBasicMaterial({
+      color: this.theme === "dark" ? Colors.primaryLight : Colors.primaryDark,
+    });
 
     for (let i = 0; i < NUMBER_OF_BOIDS; i++) {
-      this._boids.push(new Boid(objectsColor));
+      this._boids.push(new Boid(this._boidsMaterial));
     }
-    // this._boids.push(new Boid("#ff00ff", true));
-    this._objects.push(
-      new Mesh(
-        new BoxGeometry(30, 30, 30, 1, 1, 1),
-        new MeshPhysicalMaterial({
-          color: 0xffffff,
-          transmission: 1,
-          transparent: true,
-          roughness: 0,
-          thickness: 0.2,
-          opacity: 0.8,
-        }),
-      ),
-    );
 
     this._boids.forEach((boid) => {
       this._scene?.add(boid._mesh);
@@ -126,7 +115,7 @@ export class Experience {
   }
 
   buildOctree() {
-    this._octree = new Octree(4, this._botBoundary, this._topBoundary);
+    this._octree = new Octree(8, this._botBoundary, this._topBoundary);
 
     this._boids.forEach((boid) => {
       this._octree.add(boid);
@@ -146,26 +135,27 @@ export class Experience {
     this.elapsedTime = this._clock!.getElapsedTime();
     this.previousTime = this.currentTime;
     this.currentTime = this.elapsedTime;
-    const delta = this.currentTime - this.previousTime;
+    const delta = Math.min(this.currentTime - this.previousTime, 1 / 30);
 
     // Render
     this._renderer.render(this._scene!, this._camera);
     if (this._debug) this._controls.update();
 
-    let size = 0;
 
     this._boids.forEach((boid) => {
-      const boidRange = new Sphere(boid.position, boid.viewRange);
-      const boids = this._octree.query(boidRange);
-      if (boid.selected) size = boids.length;
-      boid.update(delta, boids);
+      Experience._boidRangeSphere.center.copy(boid.position);
+      Experience._boidsQueried.length = 0;
+      this._octree.query(Experience._boidRangeSphere, Experience._boidsQueried);
+      boid.update(delta, Experience._boidsQueried);
     });
+    this.buildOctree();
 
-    if (this._debug && this._infoPanel) {
-      if (this.frameCount % 4 === 0)
+    if (this.frameCount % 10 === 0) {
+      if (this._debug && this._infoPanel) {
         this._infoPanel.innerHTML = `${(1 / delta).toPrecision(
           3,
-        )}</br>${this.elapsedTime.toFixed(0)}</br>${size}`;
+        )}</br>${this.elapsedTime.toFixed(0)}</br>`;
+      }
     }
 
     window.requestAnimationFrame(() => this.tick());
@@ -173,14 +163,10 @@ export class Experience {
 
   changeTheme(theme: Theme) {
     this.theme = theme;
-    if (theme === "dark")
-      this._boids.forEach((boid) =>
-        boid.changeColor(new Color(Colors.primaryLight)),
-      );
-    if (theme === "light")
-      this._boids.forEach((boid) =>
-        boid.changeColor(new Color(Colors.primaryDark)),
-      );
+    const color =
+      this.theme === "dark" ? Colors.primaryLight : Colors.primaryDark;
+
+    this._boidsMaterial.color.set(color);
   }
 
   resizeRenderer = () => {
