@@ -1,18 +1,18 @@
-import * as THREE from "three";
+import { Color, ConeGeometry, Group, Mesh, MeshBasicMaterial, Vector3 } from "three";
 import { Octree } from "./octTree";
 
 export default class Boid {
-  readonly _mesh: THREE.Group;
-  private _geometry: THREE.ConeGeometry;
-  private _color: THREE.Color | number | string;
-  private _cone: THREE.Mesh;
+  readonly _mesh: Group;
+  private _geometry: ConeGeometry;
+  private _color: Color | number | string;
+  private _cone: Mesh;
 
   selected: boolean = false;
 
   currentNode: Octree | null;
 
-  velocity: THREE.Vector3;
-  acceleration: THREE.Vector3;
+  velocity: Vector3;
+  acceleration: Vector3;
 
   viewRange: number = 15;
   viewRangeSquared: number = this.viewRange * this.viewRange;
@@ -29,15 +29,15 @@ export default class Boid {
   constructor(color?: Boid["_color"], selected: boolean = false) {
     this.selected = selected;
     this._color = color ?? 0xff00ff;
-    this._mesh = new THREE.Group();
-    this.velocity = new THREE.Vector3(0, 0, 0);
-    this.acceleration = new THREE.Vector3(0, 0, 0);
+    this._mesh = new Group();
+    this.velocity = new Vector3(0, 0, 0);
+    this.acceleration = new Vector3(0, 0, 0);
 
-    this._geometry = new THREE.ConeGeometry(0.3, 1, 5);
+    this._geometry = new ConeGeometry(0.3, 1, 5);
 
-    this._cone = new THREE.Mesh(
+    this._cone = new Mesh(
       this._geometry,
-      new THREE.MeshBasicMaterial({
+      new MeshBasicMaterial({
         color: this._color,
       })
     );
@@ -60,7 +60,7 @@ export default class Boid {
     return this._mesh.position;
   }
 
-  changeColor(color: THREE.Color) {
+  changeColor(color: Color) {
     //@ts-ignore
     this._cone.material.color = color;
   }
@@ -76,7 +76,7 @@ export default class Boid {
   }
 
   setPosition(delta: number) {
-    const step = new THREE.Vector3();
+    const step = new Vector3();
     this.velocity.clampLength(0.7, 15);
     step.copy(this.velocity);
     step.multiplyScalar(delta);
@@ -85,7 +85,7 @@ export default class Boid {
   }
 
   setVelocity(delta: number) {
-    const velocityStep = new THREE.Vector3().copy(this.acceleration);
+    const velocityStep = new Vector3().copy(this.acceleration);
     velocityStep.multiplyScalar(delta);
     this.velocity.add(velocityStep);
     this.acceleration.set(0, 0, 0);
@@ -148,8 +148,8 @@ export default class Boid {
     this.acceleration.add(this.freeWill());
   }
 
-  separation(boids: Boid[]): THREE.Vector3 {
-    const separationVector = new THREE.Vector3(0, 0, 0);
+  separation(boids: Boid[]): Vector3 {
+    const separationVector = new Vector3(0, 0, 0);
     let neighboursCount = 0;
     boids.forEach((boid: Boid) => {
       const d = this.position.distanceToSquared(boid.position);
@@ -169,8 +169,8 @@ export default class Boid {
     return separationVector;
   }
 
-  alignment(boids: Boid[]): THREE.Vector3 {
-    const alignmentVector = new THREE.Vector3(0, 0, 0);
+  alignment(boids: Boid[]): Vector3 {
+    const alignmentVector = new Vector3(0, 0, 0);
     let neighboursCount = 0;
 
     boids.forEach((boid: Boid) => {
@@ -190,8 +190,8 @@ export default class Boid {
     return alignmentVector;
   }
 
-  cohersion(boids: Boid[]): THREE.Vector3 {
-    const centerOfMass = new THREE.Vector3(0, 0, 0);
+  cohersion(boids: Boid[]): Vector3 {
+    const centerOfMass = new Vector3(0, 0, 0);
     let neighboursCount = 0;
 
     boids.forEach((boid: Boid) => {
@@ -217,7 +217,7 @@ export default class Boid {
     const ranX = Math.random() * 2 - 1;
     const ranY = Math.random() * 2 - 1;
     const ranZ = Math.random() * 2 - 1;
-    const noise = new THREE.Vector3(ranX, ranY, ranZ);
+    const noise = new Vector3(ranX, ranY, ranZ);
     return noise.normalize().multiplyScalar(this.freeWillMag);
   }
 

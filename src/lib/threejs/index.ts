@@ -1,4 +1,16 @@
-import * as THREE from "three";
+import {
+  BoxGeometry,
+  Clock,
+  Color,
+  Mesh,
+  MeshPhysicalMaterial,
+  Object3D,
+  PerspectiveCamera,
+  Scene,
+  Sphere,
+  Vector3,
+  WebGLRenderer,
+} from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Sizes } from "./sizes";
 import { Colors } from "@/theme/Colors";
@@ -10,17 +22,17 @@ const NUMBER_OF_BOIDS = 450;
 
 export class Experience {
   private _canvas: HTMLElement;
-  private _camera: THREE.PerspectiveCamera;
-  private _renderer: THREE.WebGLRenderer;
-  private _clock?: THREE.Clock;
-  private _scene?: THREE.Scene;
-  private _objects: THREE.Object3D[] = [];
+  private _camera: PerspectiveCamera;
+  private _renderer: WebGLRenderer;
+  private _clock?: Clock;
+  private _scene?: Scene;
+  private _objects: Object3D[] = [];
   private _boids: Boid[] = [];
   private _controls: OrbitControls;
   private _octree: Octree;
 
-  private _botBoundary = new THREE.Vector3(-40, -40, -40);
-  private _topBoundary = new THREE.Vector3(40, 40, 40);
+  private _botBoundary = new Vector3(-40, -40, -40);
+  private _topBoundary = new Vector3(40, 40, 40);
 
   private _infoPanel: HTMLElement;
   private _debug: boolean;
@@ -36,17 +48,12 @@ export class Experience {
     canvas: HTMLElement,
     theme: Theme,
     info: HTMLElement,
-    debug: boolean = false
+    debug: boolean = false,
   ) {
     this._canvas = canvas;
     this._infoPanel = info;
-    this._camera = new THREE.PerspectiveCamera(
-      75,
-      Sizes.aspectRatio,
-      0.1,
-      1000
-    );
-    this._renderer = new THREE.WebGLRenderer({
+    this._camera = new PerspectiveCamera(75, Sizes.aspectRatio, 0.1, 1000);
+    this._renderer = new WebGLRenderer({
       canvas: canvas,
       alpha: true,
       antialias: true,
@@ -65,23 +72,23 @@ export class Experience {
   toggleDebug(value: boolean) {
     if (value) {
       this._camera.position.set(0, 20, 120);
-      this._camera.lookAt(new THREE.Vector3(0, 0, 0));
+      this._camera.lookAt(new Vector3(0, 0, 0));
     } else {
       this._camera.position.set(20, 10, 20);
-      this._camera.lookAt(new THREE.Vector3(20, 0, 0));
+      this._camera.lookAt(new Vector3(20, 0, 0));
     }
     this._debug = value;
     this._controls.enabled = value;
   }
 
   initialize() {
-    this._scene = new THREE.Scene();
+    this._scene = new Scene();
     if (this._debug) {
       this._camera.position.set(0, 20, 120);
-      this._camera.lookAt(new THREE.Vector3(0, 0, 0));
+      this._camera.lookAt(new Vector3(0, 0, 0));
     } else {
       this._camera.position.set(20, 10, 20);
-      this._camera.lookAt(new THREE.Vector3(20, 0, 0));
+      this._camera.lookAt(new Vector3(20, 0, 0));
     }
 
     const objectsColor =
@@ -92,17 +99,17 @@ export class Experience {
     }
     // this._boids.push(new Boid("#ff00ff", true));
     this._objects.push(
-      new THREE.Mesh(
-        new THREE.BoxGeometry(30, 30, 30, 1, 1, 1),
-        new THREE.MeshPhysicalMaterial({
+      new Mesh(
+        new BoxGeometry(30, 30, 30, 1, 1, 1),
+        new MeshPhysicalMaterial({
           color: 0xffffff,
           transmission: 1,
           transparent: true,
           roughness: 0,
           thickness: 0.2,
           opacity: 0.8,
-        })
-      )
+        }),
+      ),
     );
 
     this._boids.forEach((boid) => {
@@ -113,7 +120,7 @@ export class Experience {
 
     this.initializeRenderer();
     window.addEventListener("resize", this.resizeRenderer);
-    this._clock = new THREE.Clock();
+    this._clock = new Clock();
 
     this.tick();
   }
@@ -148,7 +155,7 @@ export class Experience {
     let size = 0;
 
     this._boids.forEach((boid) => {
-      const boidRange = new THREE.Sphere(boid.position, boid.viewRange);
+      const boidRange = new Sphere(boid.position, boid.viewRange);
       const boids = this._octree.query(boidRange);
       if (boid.selected) size = boids.length;
       boid.update(delta, boids);
@@ -157,7 +164,7 @@ export class Experience {
     if (this._debug && this._infoPanel) {
       if (this.frameCount % 4 === 0)
         this._infoPanel.innerHTML = `${(1 / delta).toPrecision(
-          3
+          3,
         )}</br>${this.elapsedTime.toFixed(0)}</br>${size}`;
     }
 
@@ -168,11 +175,11 @@ export class Experience {
     this.theme = theme;
     if (theme === "dark")
       this._boids.forEach((boid) =>
-        boid.changeColor(new THREE.Color(Colors.primaryLight))
+        boid.changeColor(new Color(Colors.primaryLight)),
       );
     if (theme === "light")
       this._boids.forEach((boid) =>
-        boid.changeColor(new THREE.Color(Colors.primaryDark))
+        boid.changeColor(new Color(Colors.primaryDark)),
       );
   }
 
