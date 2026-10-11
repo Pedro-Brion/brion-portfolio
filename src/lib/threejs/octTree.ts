@@ -16,7 +16,7 @@ export class Octree {
   constructor(
     private capacity: number,
     minPoint: Vector3,
-    maxPoint: Vector3
+    maxPoint: Vector3,
   ) {
     this._boundary = new CubicBoundary(minPoint, maxPoint);
     this._minPoint = minPoint;
@@ -28,7 +28,7 @@ export class Octree {
     const blockSize = new Vector3(
       (this._maxPoint.x - this._minPoint.x) / 2,
       (this._maxPoint.y - this._minPoint.y) / 2,
-      (this._maxPoint.z - this._minPoint.z) / 2
+      (this._maxPoint.z - this._minPoint.z) / 2,
     );
 
     for (let x = 0; x < 2; x++)
@@ -37,12 +37,12 @@ export class Octree {
           const minPoint = new Vector3(
             this._minPoint.x + x * blockSize.x,
             this._minPoint.y + y * blockSize.y,
-            this._minPoint.z + z * blockSize.z
+            this._minPoint.z + z * blockSize.z,
           );
           const maxPoint = new Vector3(
             this._minPoint.x + (x + 1) * blockSize.x,
             this._minPoint.y + (y + 1) * blockSize.y,
-            this._minPoint.z + (z + 1) * blockSize.z
+            this._minPoint.z + (z + 1) * blockSize.z,
           );
           this._nodes.push(new Octree(this.capacity, minPoint, maxPoint));
         }
@@ -87,22 +87,29 @@ export class Octree {
     return this.add(boid);
   }
 
-  query(sphere: Sphere): Boid[] {
-    if (!this._boids.length && !this._subdivided) return [];
-    const flock = [...this._boids];
+  query(sphere: Sphere, out?: Boid[]): Boid[] {
+    if (!out) {
+      out = [];
+    }
+    if (!this._boids.length && !this._subdivided) return out;
 
     if (!this._boundary.intersectsSphere(sphere)) {
-      return [];
+      return out;
     }
+    for (let b = 0; b < this._boids.length; b++) {
+      if (sphere.containsPoint(this._boids[b].position))
+        out.push(this._boids[b]);
+    }
+
     if (this._subdivided) {
       for (let i = 0; i < this._nodes.length; i++) {
         const node = this._nodes[i];
         if (node._boids.length) {
-          flock.push(...node.query(sphere));
+          node.query(sphere, out);
         }
       }
     }
-    return flock;
+    return out;
   }
 }
 
