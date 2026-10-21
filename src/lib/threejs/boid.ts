@@ -1,58 +1,51 @@
-import * as THREE from "three";
+import { ConeGeometry, Group, Material, Mesh, Vector3 } from "three";
 import { Octree } from "./octTree";
 
 export default class Boid {
-  readonly _mesh: THREE.Group;
-  private _geometry: THREE.ConeGeometry;
-  private _color: THREE.Color | number | string;
-  private _cone: THREE.Mesh;
+  readonly _mesh: Group;
+  private static _geometry: ConeGeometry = new ConeGeometry(0.3, 1, 5);
+  private _material: Material;
+  private _cone: Mesh;
 
   selected: boolean = false;
 
   currentNode: Octree | null;
 
-  velocity: THREE.Vector3;
-  acceleration: THREE.Vector3;
+  velocity: Vector3;
+  acceleration: Vector3;
 
-  viewRange: number = 15;
-  viewRangeSquared: number = this.viewRange * this.viewRange;
+  static viewRange: number = 8;
+  static viewRangeSquared: number = this.viewRange * this.viewRange;
 
-  protectRange: number = 5;
-  protectRangeSquared: number = this.protectRange * this.protectRange;
+  static protectRange: number = 4;
+  static protectRangeSquared: number = this.protectRange * this.protectRange;
 
-  wallAvoidMag: number = 10;
-  sepMag: number = 40;
-  algMag: number = 35;
-  cohMag: number = 30;
-  freeWillMag: number = 12;
+  private static _scratchVector: Vector3 = new Vector3();
 
-  constructor(color?: Boid["_color"], selected: boolean = false) {
-    this.selected = selected;
-    this._color = color ?? 0xff00ff;
-    this._mesh = new THREE.Group();
-    this.velocity = new THREE.Vector3(0, 0, 0);
-    this.acceleration = new THREE.Vector3(0, 0, 0);
+  static wallAvoidMag: number = 10;
+  static sepMag: number = 75;
+  static algMag: number = 50;
+  static cohMag: number = 40;
+  static freeWillMag: number = 12;
 
-    this._geometry = new THREE.ConeGeometry(0.3, 1, 5);
-
-    this._cone = new THREE.Mesh(
-      this._geometry,
-      new THREE.MeshBasicMaterial({
-        color: this._color,
-      })
-    );
+  constructor(material: Material) {
+    this._mesh = new Group();
+    this.velocity = new Vector3(0, 0, 0);
+    this.acceleration = new Vector3(0, 0, 0);
+    this._material = material;
+    this._cone = new Mesh(Boid._geometry, this._material);
 
     this._mesh.add(this._cone);
     this._cone.rotation.x = 0.5 * Math.PI;
     this.velocity.set(
       Math.random() * 30 - 15,
       Math.random() * 30 - 15,
-      Math.random() * 30 - 15
+      Math.random() * 30 - 15,
     );
     this.position.set(
       Math.random() * 30 - 15,
       Math.random() * 30 - 15,
-      Math.random() * 30 - 15
+      Math.random() * 30 - 15,
     );
   }
 
@@ -60,9 +53,8 @@ export default class Boid {
     return this._mesh.position;
   }
 
-  changeColor(color: THREE.Color) {
-    //@ts-ignore
-    this._cone.material.color = color;
+  changeColor(material: Material) {
+    this._cone.material = material;
   }
 
   update(delta: number, flock: Boid[]) {
@@ -76,18 +68,13 @@ export default class Boid {
   }
 
   setPosition(delta: number) {
-    const step = new THREE.Vector3();
     this.velocity.clampLength(0.7, 15);
-    step.copy(this.velocity);
-    step.multiplyScalar(delta);
 
-    this.position.add(step);
+    this.position.addScaledVector(this.velocity, delta);
   }
 
   setVelocity(delta: number) {
-    const velocityStep = new THREE.Vector3().copy(this.acceleration);
-    velocityStep.multiplyScalar(delta);
-    this.velocity.add(velocityStep);
+    this.velocity.addScaledVector(this.acceleration, delta);
     this.acceleration.set(0, 0, 0);
   }
 
@@ -95,27 +82,27 @@ export default class Boid {
     const wallsLimits = 25;
     if (this.position.x <= -wallsLimits) {
       this.acceleration.x +=
-        this.wallAvoidMag * (-wallsLimits - this.position.x);
+        Boid.wallAvoidMag * (-wallsLimits - this.position.x);
     }
     if (this.position.x >= wallsLimits) {
       this.acceleration.x +=
-        this.wallAvoidMag * (wallsLimits - this.position.x);
+        Boid.wallAvoidMag * (wallsLimits - this.position.x);
     }
     if (this.position.y <= -wallsLimits) {
       this.acceleration.y +=
-        this.wallAvoidMag * (-wallsLimits - this.position.y);
+        Boid.wallAvoidMag * (-wallsLimits - this.position.y);
     }
     if (this.position.y >= wallsLimits) {
       this.acceleration.y +=
-        this.wallAvoidMag * (wallsLimits - this.position.y);
+        Boid.wallAvoidMag * (wallsLimits - this.position.y);
     }
     if (this.position.z <= -wallsLimits) {
       this.acceleration.z +=
-        this.wallAvoidMag * (-wallsLimits - this.position.z);
+        Boid.wallAvoidMag * (-wallsLimits - this.position.z);
     }
     if (this.position.z >= wallsLimits) {
       this.acceleration.z +=
-        this.wallAvoidMag * (wallsLimits - this.position.z);
+        Boid.wallAvoidMag * (wallsLimits - this.position.z);
     }
   }
 
@@ -142,74 +129,73 @@ export default class Boid {
   }
 
   flock(boids: Boid[]) {
-    this.acceleration.add(this.separation(boids).multiplyScalar(this.sepMag));
-    this.acceleration.add(this.alignment(boids).multiplyScalar(this.algMag));
-    this.acceleration.add(this.cohersion(boids).multiplyScalar(this.cohMag));
+    this.acceleration.add(this.separation(boids).multiplyScalar(Boid.sepMag));
+    this.acceleration.add(this.alignment(boids).multiplyScalar(Boid.algMag));
+    this.acceleration.add(this.cohersion(boids).multiplyScalar(Boid.cohMag));
     this.acceleration.add(this.freeWill());
   }
 
-  separation(boids: Boid[]): THREE.Vector3 {
-    const separationVector = new THREE.Vector3(0, 0, 0);
+  separation(boids: Boid[]): Vector3 {
+    Boid._scratchVector.set(0, 0, 0);
     let neighboursCount = 0;
     boids.forEach((boid: Boid) => {
       const d = this.position.distanceToSquared(boid.position);
 
-      if (d < this.protectRangeSquared) {
-        const diff = this.position.clone().sub(boid.position);
-        separationVector.add(diff);
+      if (d < Boid.protectRangeSquared) {
+        Boid._scratchVector.add(this.position).sub(boid.position);
         neighboursCount++;
       }
     });
 
     if (neighboursCount) {
-      separationVector.divideScalar(neighboursCount);
-      separationVector.normalize();
+      Boid._scratchVector.divideScalar(neighboursCount);
+      Boid._scratchVector.normalize();
     }
 
-    return separationVector;
+    return Boid._scratchVector;
   }
 
-  alignment(boids: Boid[]): THREE.Vector3 {
-    const alignmentVector = new THREE.Vector3(0, 0, 0);
+  alignment(boids: Boid[]): Vector3 {
+    Boid._scratchVector.set(0, 0, 0);
     let neighboursCount = 0;
 
     boids.forEach((boid: Boid) => {
       const d = this.position.distanceToSquared(boid.position);
 
-      if (d < this.viewRangeSquared && d > this.protectRangeSquared) {
+      if (d < Boid.viewRangeSquared && d > Boid.protectRangeSquared) {
         neighboursCount++;
-        alignmentVector.add(boid.velocity.clone());
+        Boid._scratchVector.add(boid.velocity);
       }
     });
 
     if (neighboursCount) {
-      alignmentVector.divideScalar(neighboursCount);
-      alignmentVector.normalize();
+      Boid._scratchVector.divideScalar(neighboursCount);
+      Boid._scratchVector.normalize();
     }
 
-    return alignmentVector;
+    return Boid._scratchVector;
   }
 
-  cohersion(boids: Boid[]): THREE.Vector3 {
-    const centerOfMass = new THREE.Vector3(0, 0, 0);
+  cohersion(boids: Boid[]): Vector3 {
+    Boid._scratchVector.set(0, 0, 0);
     let neighboursCount = 0;
 
     boids.forEach((boid: Boid) => {
       const d = this.position.distanceToSquared(boid.position);
 
-      if (d < this.viewRangeSquared && d > this.protectRangeSquared) {
+      if (d < Boid.viewRangeSquared && d > Boid.protectRangeSquared) {
         neighboursCount++;
-        centerOfMass.add(boid.position.clone());
+        Boid._scratchVector.add(boid.position);
       }
     });
 
     if (neighboursCount) {
-      centerOfMass.divideScalar(neighboursCount);
-      centerOfMass.sub(this.position);
-      centerOfMass.normalize();
+      Boid._scratchVector.divideScalar(neighboursCount);
+      Boid._scratchVector.sub(this.position);
+      Boid._scratchVector.normalize();
     }
 
-    return centerOfMass;
+    return Boid._scratchVector;
   }
 
   /** Random noise to simulate a living being*/
@@ -217,13 +203,13 @@ export default class Boid {
     const ranX = Math.random() * 2 - 1;
     const ranY = Math.random() * 2 - 1;
     const ranZ = Math.random() * 2 - 1;
-    const noise = new THREE.Vector3(ranX, ranY, ranZ);
-    return noise.normalize().multiplyScalar(this.freeWillMag);
+    Boid._scratchVector.set(ranX, ranY, ranZ);
+    return Boid._scratchVector.normalize().multiplyScalar(Boid.freeWillMag);
   }
 
   faceFront() {
-    const direction = this.velocity.clone();
-    direction.add(this.position);
-    this._mesh.lookAt(direction);
+    Boid._scratchVector.copy(this.velocity);
+    Boid._scratchVector.add(this.position);
+    this._mesh.lookAt(Boid._scratchVector);
   }
 }

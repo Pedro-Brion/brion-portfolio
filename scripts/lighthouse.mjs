@@ -30,7 +30,7 @@ const options = { logLevel: "warn", output: "html", port: chrome.port };
 console.log("Running LH...");
 
 try {
-  const runnerResult = await lighthouse("https://briondev.com", options);
+  const runnerResult = await lighthouse("http://localhost:4173", options);
   const reportHtml = runnerResult.report;
   console.log(`Writing report ${dateString}`);
 
