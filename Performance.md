@@ -46,10 +46,15 @@ This document outlines the strategy to optimize the Brion Portfolio from its cur
 
 | Task ID | Description | Effort | Impact | Status |
 |---|---|---|---|---|
-| RT-2.1 | **Vector Scratchpads:** Remove `.clone()` and `new Vector3()` from Boid loop. Use static reused variables. | Medium | High | [ ] |
-| RT-2.2 | **Object Pooling:** Pre-allocate `THREE.Sphere` for Octree queries outside the `tick()` function. | Medium | Med | [ ] |
-| RT-2.3 | **DOM Throttling:** Update Debug Panel `innerHTML` once every 10–20 frames instead of every frame. | Low | Med | [ ] |
+| RT-2.1 | **Vector Scratchpads:** Remove `.clone()` and `new Vector3()` from Boid loop. Use static reused variables. | Medium | High | [X] |
+| RT-2.2 | **Object Pooling:** Pre-allocate `THREE.Sphere` for Octree queries outside the `tick()` function. | Medium | Med | [X] |
+| RT-2.3 | **DOM Throttling:** Update Debug Panel `innerHTML` once every 10–20 frames instead of every frame. | Low | Med | [X] |
 | RT-2.4 | **Event Lifecycle:** Implement `destroy()` in `Experience` to remove `window` resize listeners. | Low | Low | [ ] |
+| RT-2.5 | **Working Octree:** Rebuild the Octree every frame so queries use current positions (it was built once and never updated). | Low | High | [X] |
+| RT-2.6 | **Query Output Array:** `query(sphere, out)` fills a caller-owned array and filters boids by distance, instead of spreading/merging arrays per node. | Low | High | [X] |
+| RT-2.7 | **Delta Clamp:** Cap `delta` at 1/30s so a hidden tab or long frame can't fling boids out of bounds. | Low | Med | [X] |
+| RT-2.8 | **Octree Node Reuse:** Clear and reuse nodes on rebuild (or switch to a uniform grid with `viewRange`-sized cells). | Medium | Med | [ ] |
+| RT-2.9 | **Single-Pass Flocking:** Merge separation/alignment/cohesion into one loop over neighbours. | Low | High | [ ] |
 
 ---
 
@@ -61,6 +66,7 @@ This document outlines the strategy to optimize the Brion Portfolio from its cur
 | GPU-3.1 | **Instanced Mesh:** Refactor 450 Boid meshes into a single `THREE.InstancedMesh`. | High | High | [ ] |
 | GPU-3.2 | **Compositor Layers:** Add `contain: strict` or `will-change: transform` to the Canvas CSS. | Low | Low | [ ] |
 | GPU-3.3 | **Web Workers:** Offload Boid/Octree calculations to a Worker thread to hit 0ms TBT. | High | High | [ ] |
+| GPU-3.4 | **Shared Geometry & Material:** One `ConeGeometry` and one `MeshBasicMaterial` for all boids; theme change sets the material color in place. | Low | Med | [X] |
 
 ---
 
@@ -76,6 +82,33 @@ private static _tempVec = new THREE.Vector3();
 // ... inside loop
 _tempVec.copy(this.position).sub(other.position);
 ```
+
+### Caller-Owned Output Array *(Fix for RT-2.6)*
+Create the result array once, empty it per query, and pass it down the recursion. Nodes push into it; nothing is returned up the tree:
+
+```ts
+// once
+private static _boidsQueried: Boid[] = [];
+
+// per boid
+Experience._boidsQueried.length = 0;
+this._octree.query(sphere, Experience._boidsQueried);
+```
+
+Inside `query`, test each boid with `sphere.containsPoint(...)` in a plain `for` loop. `.filter()` or spreading would allocate again.
+
+### Simulation Benchmark *(RT-2.1 – RT-2.7)*
+Simulation only (no rendering), measured in Node (same V8 as Chrome): 451 boids, seeded start, 1200 frames after 300 warm-up.
+
+| Version | Sim ms/frame | Neighbours returned / in range | GCs/s at 60fps |
+|---|---|---|---|
+| Before (stale Octree) | 7.7 | 95 / 399 | 111 |
+| Before, Octree rebuilt every frame | 37.0 | 413 / — | 64 |
+| **After RT-2.1 – RT-2.7** | **6.8** | **91 / 90** | **7.4** |
+
+Lessons learned:
+- The old version was fast only because the stale tree returned the wrong (much smaller) neighbour list.
+- An Octree only helps when `viewRange` is small relative to the flock's spread. At `viewRange = 15` the flock packs tighter than the view range, so every boid sees most of the flock and the work is ~N². Flocking parameters were retuned (`viewRange` 8, `protectRange` 4) as part of this.
 
 ### Dynamic Importing *(Fix for BP-1.1)*
 Allow the UI to render before loading heavy assets:
